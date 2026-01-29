@@ -28,7 +28,7 @@ const Register = () => {
         answer,
       });
       if (res && res.data.success) {
-        toast.success("Register Successfully, please login");
+        toast.success("Registered Successfully, please login");
         navigate("/login");
       } else {
         toast.error(res.data.message);

@@ -67,7 +67,7 @@ describe('Register Component', () => {
     fireEvent.click(getByText('REGISTER'));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Register Successfully, please login');
+    expect(toast.success).toHaveBeenCalledWith('Registered Successfully, please login');
   });
 
   it('should display error message on failed registration', async () => {
