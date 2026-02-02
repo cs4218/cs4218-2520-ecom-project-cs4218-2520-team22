@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import connectDB from "./db";
 
 jest.mock("mongoose");
-jest.mock("colors");
 
 describe("connectDB", () => {
   const OLD_ENV = process.env;
