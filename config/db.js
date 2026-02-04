@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "colors";
 
 const clientOptions = {
   serverApi: { version: "1", strict: true, deprecationErrors: true },

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import connectDB from "./db";
+import "colors";
 
 jest.mock("mongoose");
 
