@@ -1,8 +1,10 @@
 import {
   getProductController,
   getSingleProductController,
+  productPhotoController,
 } from "./productController";
 import productModel from "../models/productModel";
+import { describe } from "node:test";
 
 jest.mock("../models/productModel");
 
@@ -195,6 +197,81 @@ describe("getSingleProductController", () => {
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Error while getting single product",
+      error: expect.any(Error),
+    });
+  });
+});
+
+describe("productPhotoController", () => {
+  let req, res, mockProduct;
+
+  beforeEach(() => {
+    req = {
+      params: { pid: "test-product-id" },
+    };
+    res = {
+      set: jest.fn(),
+      send: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+    };
+    mockProduct = {
+      photo: {
+        data: Buffer.from("test-photo-data"),
+        contentType: "image/png",
+      },
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should fetch product photo and send it in the response", async () => {
+    const findByIdMock = jest.fn().mockReturnThis();
+    const selectMock = jest.fn().mockResolvedValue(mockProduct);
+
+    // Mock the productModel methods
+    findByIdMock.mockReturnValue({
+      select: selectMock,
+    });
+
+    // Attach the mocks to productModel
+    productModel.findById = findByIdMock;
+
+    await productPhotoController(req, res);
+
+    expect(findByIdMock).toHaveBeenCalledWith(req.params.pid);
+    expect(selectMock).toHaveBeenCalledWith("photo");
+    expect(res.set).toHaveBeenCalledWith(
+      "Content-type",
+      mockProduct.photo.contentType,
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(mockProduct.photo.data);
+  });
+
+  it("should handle errors and send a failure response", async () => {
+    const errorMessage = "Database error";
+
+    const findByIdMock = jest.fn().mockReturnThis();
+    const selectMock = jest.fn().mockRejectedValue(new Error(errorMessage));
+
+    // Mock the productModel methods
+    findByIdMock.mockReturnValue({
+      select: selectMock,
+    });
+
+    // Attach the mocks to productModel
+    productModel.findById = findByIdMock;
+
+    await productPhotoController(req, res);
+
+    expect(findByIdMock).toHaveBeenCalledWith(req.params.pid);
+    expect(selectMock).toHaveBeenCalledWith("photo");
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting photo",
       error: expect.any(Error),
     });
   });
