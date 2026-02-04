@@ -1,4 +1,7 @@
-import { getProductController } from "./productController";
+import {
+  getProductController,
+  getSingleProductController,
+} from "./productController";
 import productModel from "../models/productModel";
 
 jest.mock("../models/productModel");
@@ -110,6 +113,89 @@ describe("getProductController", () => {
       success: false,
       message: "Error in getting products",
       error: errorMessage,
+    });
+  });
+});
+
+describe("getSingleProductController", () => {
+  let req, res, mockProduct;
+
+  beforeEach(() => {
+    req = {
+      params: { slug: "test-slug" },
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+    mockProduct = {
+      name: "Test Product",
+      slug: "test-slug",
+      category: "Test Category",
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should fetch a single product and send a success response", async () => {
+    const findOneMock = jest.fn().mockReturnThis();
+    const selectMock = jest.fn().mockReturnThis();
+    const populateMock = jest.fn().mockResolvedValue(mockProduct);
+
+    // Mock the productModel methods
+    findOneMock.mockReturnValue({
+      select: selectMock,
+    });
+    selectMock.mockReturnValue({
+      populate: populateMock,
+    });
+
+    // Attach the mocks to productModel
+    productModel.findOne = findOneMock;
+
+    await getSingleProductController(req, res);
+
+    expect(findOneMock).toHaveBeenCalledWith({ slug: req.params.slug });
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(populateMock).toHaveBeenCalledWith("category");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Single Product Fetched",
+      product: mockProduct,
+    });
+  });
+
+  it("should handle errors and send a failure response", async () => {
+    const errorMessage = "Database error";
+
+    const findOneMock = jest.fn().mockReturnThis();
+    const selectMock = jest.fn().mockReturnThis();
+    const populateMock = jest.fn().mockRejectedValue(new Error(errorMessage));
+
+    // Mock the productModel methods
+    findOneMock.mockReturnValue({
+      select: selectMock,
+    });
+    selectMock.mockReturnValue({
+      populate: populateMock,
+    });
+
+    // Attach the mocks to productModel
+    productModel.findOne = findOneMock;
+
+    await getSingleProductController(req, res);
+
+    expect(findOneMock).toHaveBeenCalledWith({ slug: req.params.slug });
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(populateMock).toHaveBeenCalledWith("category");
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting single product",
+      error: expect.any(Error),
     });
   });
 });
