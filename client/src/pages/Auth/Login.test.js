@@ -9,6 +9,7 @@ import Login from './Login';
 // Mocking axios.post
 jest.mock('axios');
 jest.mock('react-hot-toast');
+jest.mock('../../hooks/useCategory');
 
 jest.mock('../../context/auth', () => ({
     useAuth: jest.fn(() => [null, jest.fn()]) // Mock useAuth hook to return null state and a mock function for setAuth
@@ -57,6 +58,7 @@ describe('Login Component', () => {
         expect(getByPlaceholderText('Enter Your Email')).toBeInTheDocument();
         expect(getByPlaceholderText('Enter Your Password')).toBeInTheDocument();
       });
+
       it('inputs should be initially empty', () => {
         const { getByText, getByPlaceholderText } = render(
           <MemoryRouter initialEntries={['/login']}>
@@ -79,8 +81,10 @@ describe('Login Component', () => {
             </Routes>
           </MemoryRouter>
         );
+
         fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
         fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
+        
         expect(getByPlaceholderText('Enter Your Email').value).toBe('test@example.com');
         expect(getByPlaceholderText('Enter Your Password').value).toBe('password123');
       });
@@ -104,7 +108,8 @@ describe('Login Component', () => {
 
         fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
         fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
-        fireEvent.click(getByText('LOGIN'));
+        
+        fireEvent.click(getByText('LOGIN')); // Act
 
         await waitFor(() => expect(axios.post).toHaveBeenCalled());
         expect(toast.success).toHaveBeenCalledWith(undefined, {
@@ -130,7 +135,8 @@ describe('Login Component', () => {
 
         fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'test@example.com' } });
         fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
-        fireEvent.click(getByText('LOGIN'));
+        
+        fireEvent.click(getByText('LOGIN')); // Act
 
         await waitFor(() => expect(axios.post).toHaveBeenCalled());
         expect(toast.error).toHaveBeenCalledWith('Something went wrong');
