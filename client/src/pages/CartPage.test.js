@@ -25,6 +25,24 @@ jest.mock("../context/cart", () => ({
     useCart: jest.fn(() => [[], jest.fn()])
 }));
 
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+    ...jest.requireActual("react-router-dom"),
+    useNavigate: () => mockNavigate
+}));
+
+const mockRequestPaymentMethod = jest.fn().mockResolvedValue({ nonce: "test" });
+jest.mock("braintree-web-drop-in-react", () => ({
+    __esModule: true,
+    default: ({ onInstance }) => {
+        const React = require("react");
+        React.useEffect(() => {
+            onInstance({ requestPaymentMethod: mockRequestPaymentMethod });
+        }, []);
+        return React.createElement("div", { "data-testid": "mockDropIn" });
+    },
+}));
+
 let consoleSpy;
 
 beforeEach(() => {
@@ -364,6 +382,237 @@ describe("Cart Page renders", () => {
             const img = screen.getByAltText("Product 1");
             expect(img).toBeInTheDocument();
             expect(img).toHaveAttribute("src", "/api/v1/product/product-photo/1");
+        });
+    });
+
+    describe("total price", () => {
+        it("successfully", async() => {
+            useCart.mockReturnValueOnce([
+                [
+                    {   
+                        _id: "1",
+                        name: "Product 1",
+                        description: "Description 1",
+                        price: 10,
+                        slug: "test"
+                    },
+                    {   
+                        _id: "2",
+                        name: "Product 2",
+                        description: "Description 2",
+                        price: 20,
+                        slug: "test"
+                    }
+                ],
+                jest.fn()
+            ]);
+
+            renderPage();
+
+            await waitFor(async () => {
+                expect(await screen.findByText("Total : $30.00")).toBeInTheDocument();
+            });
+
+        });
+
+        it("unsuccessfully", async() => {
+            const toLocaleStringSpy = jest.spyOn(Number.prototype, "toLocaleString").mockImplementation(() => {
+                throw new Error("Test Error");
+            });
+
+            renderPage();
+
+            await waitFor(async () => {
+                expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+            });
+
+            toLocaleStringSpy.mockRestore();
+        });
+    });
+});
+
+describe("Cart Page handles remove product from cart", () => {
+    it("successfully", async () => {
+        const mockSetCart = jest.fn();
+        useCart.mockReturnValueOnce([
+            [
+                {   
+                    _id: "1",
+                    name: "Product 1",
+                    description: "Description 1",
+                    price: 10,
+                    slug: "test"
+                }
+            ],
+            mockSetCart
+        ]);
+    
+        renderPage();
+    
+        const removeButton = await screen.findByRole("button", { name: "Remove" });
+        fireEvent.click(removeButton);
+        await waitFor(async () => {
+            expect(mockSetCart).toHaveBeenCalledWith([]);
+        });
+    });
+
+    it("unsuccessfully", async () => {
+        useCart.mockReturnValueOnce([
+            [
+                {   
+                    _id: "1",
+                    name: "Product 1",
+                    description: "Description 1",
+                    price: 10,
+                    slug: "test"
+                }
+            ],
+            jest.fn(() => {
+                throw new Error("Test Error");
+            })
+        ]);
+    
+        renderPage();
+    
+        const removeButton = await screen.findByRole("button", { name: "Remove" });
+        fireEvent.click(removeButton);
+        await waitFor(async () => {
+            expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+        });
+    });
+});
+
+describe("Cart Page fetches payment gateway token", () => {
+    it("successfully", async () => {
+        axios.get.mockResolvedValueOnce({ 
+            data: {
+                clientToken: 'testToken'
+            }
+        });
+
+        renderPage();
+    
+        await waitFor(async () => {
+            expect(consoleSpy).not.toHaveBeenCalledWith(expect.any(Error));
+        });
+    });
+
+    it("unsuccessfully", async () => {
+        axios.get.mockRejectedValueOnce(new Error("Test Error"));
+    
+        renderPage();
+    
+        await waitFor(async () => {
+            expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+        });
+    });
+});
+
+describe("Cart Page handles payment", () => {
+    it("successfully", async () => {
+        axios.get.mockResolvedValueOnce({ 
+            data: {
+                clientToken: 'testToken'
+            }
+        });
+        axios.post.mockResolvedValueOnce({ 
+            data: {
+                ok: true
+            }
+        });
+        useCart.mockReturnValue([
+            [
+                {   
+                    _id: "1",
+                    name: "Product 1",
+                    description: "Description 1",
+                    price: 10,
+                    slug: "test",
+                    category: "1"
+                }
+            ],
+            jest.fn()
+        ]);
+        useAuth.mockReturnValue([
+            {
+                user: { name: "Test", address: "123 Test St" },
+                token: "testToken",
+            },
+            jest.fn()
+        ]);
+
+        renderPage();
+    
+        await waitFor(async () => {
+            expect(screen.getByTestId("mockDropIn")).toBeInTheDocument();
+        });
+        const makePayementButton = await screen.findByRole("button", { name: "Make Payment" });
+        await waitFor(() => expect(makePayementButton).not.toBeDisabled());
+        fireEvent.click(makePayementButton);
+
+        await waitFor(() => {
+            expect(mockRequestPaymentMethod).toHaveBeenCalledTimes(1);
+            expect(axios.post).toHaveBeenCalledWith(
+                "/api/v1/product/braintree/payment",
+                expect.objectContaining({ 
+                    nonce: "test", 
+                    cart:  [
+                        {   
+                            _id: "1",
+                            name: "Product 1",
+                            description: "Description 1",
+                            price: 10,
+                            slug: "test",
+                            category: "1"
+                        }
+                    ], 
+                })
+            );
+            expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/orders");
+        });
+        useAuth.mockReturnValue([null, jest.fn()]);
+        useCart.mockReturnValue([[], jest.fn()]);
+    });
+
+    it("unsuccessfully", async () => {
+        axios.post.mockRejectedValueOnce(new Error("Test Error"));
+
+        renderPage();
+    
+        await waitFor(async () => {
+            expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+        });
+    });
+});
+
+describe("Cart Page navigates to another page after clicking", () => {
+    it("update address button", async () => {
+        useAuth.mockReturnValueOnce([
+            {
+                user: { name: "Test", address: "123 Test St" },
+                token: "testToken",
+            },
+            jest.fn()
+        ]);
+
+        renderPage();
+        
+        const button = screen.getByRole("button", { name: "Update Address" });
+        fireEvent.click(button);
+
+        await waitFor(async () => {
+            expect(mockNavigate).toHaveBeenCalledWith("/dashboard/user/profile");
+        });
+    });
+    
+    it("please login to checkout button", async () => {
+        renderPage();
+
+        const button = screen.getByRole("button", { name: "Please Login to checkout" });
+        fireEvent.click(button);
+
+        await waitFor(async () => {
+            expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/cart" });
         });
     });
 });
