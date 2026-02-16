@@ -321,7 +321,7 @@ export const productCategoryController = async (req, res) => {
     res.status(400).send({
       success: false,
       error,
-      message: "Error While Getting products",
+      message: "Error while getting products",
     });
   }
 };
@@ -348,7 +348,11 @@ export const brainTreePaymentController = async (req, res) => {
     const { nonce, cart } = req.body;
     let total = 0;
     cart.map((i) => {
-      total += i.price;
+      if (isFinite(i.price)) {
+        total += i.price;
+      } else {
+        throw new Error("Price is invalid for product")
+      }
     });
     let newTransaction = gateway.transaction.sale(
       {
