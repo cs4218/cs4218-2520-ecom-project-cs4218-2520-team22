@@ -85,6 +85,7 @@ export const getProductController = async (req, res) => {
     });
   }
 };
+
 // get single product
 export const getSingleProductController = async (req, res) => {
   try {
@@ -170,7 +171,7 @@ export const updateProductController = async (req, res) => {
     const products = await productModel.findByIdAndUpdate(
       req.params.pid,
       { ...req.fields, slug: slugify(name) },
-      { new: true }
+      { new: true },
     );
     if (photo) {
       products.photo.data = fs.readFileSync(photo.path);
@@ -321,7 +322,7 @@ export const productCategoryController = async (req, res) => {
     res.status(400).send({
       success: false,
       error,
-      message: "Error While Getting products",
+      message: "Error while getting products",
     });
   }
 };
@@ -369,7 +370,7 @@ export const brainTreePaymentController = async (req, res) => {
         } else {
           res.status(500).send(error);
         }
-      }
+      },
     );
   } catch (error) {
     console.log(error);
