@@ -17,10 +17,10 @@ jest.mock('../../context/auth', () => ({
   jest.mock('../../context/cart', () => ({
     useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function
   }));
-    
+
 jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
-  }));  
+  }));
 
   Object.defineProperty(window, 'localStorage', {
     value: {
@@ -38,11 +38,12 @@ window.matchMedia = window.matchMedia || function() {
       removeListener: function() {}
     };
   };
-      
+
 
 describe('Register Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    axios.get.mockResolvedValueOnce({ data: { category: [] } });
   });
 
   it('should register the user successfully', async () => {
@@ -68,6 +69,7 @@ describe('Register Component', () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledWith('Registered Successfully, please login');
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Registered Successfully, please login'));
   });
 
   it('should display error message on failed registration', async () => {
@@ -92,6 +94,6 @@ describe('Register Component', () => {
     fireEvent.click(getByText('REGISTER'));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Something went wrong'));
   });
 });
