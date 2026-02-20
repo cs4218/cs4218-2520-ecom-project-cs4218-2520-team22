@@ -26,6 +26,17 @@ jest.mock("../components/Prices", () => ({
     ],
 }));
 
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+    ...jest.requireActual("react-router-dom"),
+    useNavigate: () => mockNavigate
+}));
+
+Object.defineProperty(globalThis, "location", {
+    writable: true,
+    value: { reload: jest.fn() }
+});
+
 let consoleSpy;
 
 beforeEach(() => {
@@ -383,8 +394,8 @@ describe("Home Page triggers load more button", () => {
     });
 })
 
-describe("Home Page filter section", () => {
-    it("category is checked", async() => {
+describe("Home Page filter products api is", () => {
+    it("called when both category and price is checked", async() => {
         axios.get.mockImplementation((url) => {
             if (url.includes("get-category")) {
                 return Promise.resolve({ 
@@ -404,6 +415,38 @@ describe("Home Page filter section", () => {
 
         const selectedCategory = await screen.findByText("Category 1");
         fireEvent.click(selectedCategory);
+        const selectedPrice = await screen.findByText("$0 - 19");
+        fireEvent.click(selectedPrice);
+
+        await waitFor(() => {
+            expect(axios.post).toHaveBeenCalledWith(
+				"/api/v1/product/product-filters",
+				expect.objectContaining({ checked: ["1"], radio: [0, 19] })
+			);
+        });
+    });
+
+    it("called when only category is checked", async() => {
+        axios.get.mockImplementation((url) => {
+            if (url.includes("get-category")) {
+                return Promise.resolve({ 
+                    data: {
+                        success: true,
+                        category: [
+                            { _id: "1", name: "Category 1" },
+                            { _id: "2", name: "Category 2" },
+                        ]
+                    }
+                });
+            }
+            return Promise.resolve({ data: {} });
+        });
+
+        renderPage();
+
+        const selectedCategory = await screen.findByText("Category 1");
+        fireEvent.click(selectedCategory);
+
         await waitFor(() => {
             expect(axios.post).toHaveBeenCalledWith(
 				"/api/v1/product/product-filters",
@@ -411,7 +454,8 @@ describe("Home Page filter section", () => {
 			);
         });
     });
-    it("price is checked", async() => {
+
+    it("called when only price is checked", async() => {
         axios.get.mockImplementation((url) => {
             return Promise.resolve({ data: {} });
         });
@@ -427,10 +471,16 @@ describe("Home Page filter section", () => {
 			);
         });
     });
-})
 
-describe("Home Page fetches filtered products via api call", () => {
-    it("successfully", async () => {
+    it("not called when both category and price are not checked", async() => {
+        renderPage();
+
+        await waitFor(() => {
+            expect(axios.post).not.toHaveBeenCalled();
+        });
+    });
+
+    it("called successfully", async() => {
         axios.get.mockImplementation((url) => {
             if (url.includes("get-category")) {
                 return Promise.resolve({ 
@@ -457,8 +507,7 @@ describe("Home Page fetches filtered products via api call", () => {
                     },
                 ],
             },
-        });
-
+        })
         renderPage();
 
         const selectedCategory = await screen.findByText("Category 1");
@@ -467,7 +516,7 @@ describe("Home Page fetches filtered products via api call", () => {
         expect(await screen.findByText("Product 1")).toBeInTheDocument();
     });
 
-    it("unsuccessfully", async () => {
+    it("is called unsuccessfully", async () => {
         axios.get.mockImplementation((url) => {
             if (url.includes("get-category")) {
                 return Promise.resolve({ 
@@ -523,4 +572,49 @@ it("Home Page handles add to cart successfully", async () => {
     });
 
     setItemSpy.mockRestore();
+});
+
+it("Home Page redirects to product details page when click on more details button", async () => {
+    axios.get.mockImplementation((url) => {
+        if (url.includes("product-list")) {
+            return Promise.resolve({ 
+                data: { 
+                    products: [
+                        {
+                            _id: "1",
+                            name: "Product 1",
+                            description: "Description 1",
+                            price: 10,
+                            slug: "test"
+                        }
+                    ] 
+                } 
+            });
+        }
+        return Promise.resolve({ data: {} });
+    });
+
+    renderPage();
+
+    const moreDetails = await screen.findByRole("button", { name: "More Details" })
+    fireEvent.click(moreDetails);
+
+    await waitFor(async () => {
+        expect(mockNavigate).toHaveBeenCalledWith("/product/test");
+    });
+});
+
+it("Home Page calls reloads window when click on reset filters button", async () => {
+    axios.get.mockImplementation((url) => {
+        return Promise.resolve({ data: {} });
+    });
+
+    renderPage();
+
+    const button = screen.getByRole("button", { name: "RESET FILTERS" });
+    fireEvent.click(button);
+
+    await waitFor(async () => {
+        expect(globalThis.location.reload).toHaveBeenCalled();
+    });
 });

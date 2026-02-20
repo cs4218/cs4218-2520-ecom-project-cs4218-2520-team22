@@ -575,13 +575,48 @@ describe("Cart Page handles payment", () => {
     });
 
     it("unsuccessfully", async () => {
+        axios.get.mockResolvedValueOnce({ 
+            data: {
+                clientToken: 'testToken'
+            }
+        });
         axios.post.mockRejectedValueOnce(new Error("Test Error"));
+        useCart.mockReturnValue([
+            [
+                {   
+                    _id: "1",
+                    name: "Product 1",
+                    description: "Description 1",
+                    price: 10,
+                    slug: "test",
+                    category: "1"
+                }
+            ],
+            jest.fn()
+        ]);
+        useAuth.mockReturnValue([
+            {
+                user: { name: "Test", address: "123 Test St" },
+                token: "testToken",
+            },
+            jest.fn()
+        ]);
 
         renderPage();
     
         await waitFor(async () => {
+            expect(screen.getByTestId("mockDropIn")).toBeInTheDocument();
+        });
+        const makePayementButton = await screen.findByRole("button", { name: "Make Payment" });
+        await waitFor(() => expect(makePayementButton).not.toBeDisabled());
+        fireEvent.click(makePayementButton);
+    
+        await waitFor(async () => {
             expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
         });
+
+        useAuth.mockReturnValue([null, jest.fn()]);
+        useCart.mockReturnValue([[], jest.fn()]);
     });
 });
 
