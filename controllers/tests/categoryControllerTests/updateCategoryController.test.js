@@ -1,6 +1,5 @@
 import { updateCategoryController } from "../../categoryController";
 import categoryModel from "../../../models/categoryModel";
-import slugify from "slugify";
 
 jest.mock("slugify", () => jest.fn((s) => `slug-${s}`));
 
