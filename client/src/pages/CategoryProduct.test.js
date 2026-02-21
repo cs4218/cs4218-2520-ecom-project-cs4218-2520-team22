@@ -1,3 +1,5 @@
+// MANSOOR Syed Ali A0337939J
+
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -112,5 +114,13 @@ describe("CategoryProduct", () => {
     const moreDetailsBtn = screen.getByText(/More Details/);
     moreDetailsBtn.click();
     expect(mockNavigate).toHaveBeenCalledWith("/product/prod1");
+  });
+
+  it("doesn't fetch products when slug is missing", async () => {
+    useParams.mockReturnValue({});
+    render(<CategoryProduct />);
+    await waitFor(() => {
+      expect(axios.get).not.toHaveBeenCalled();
+    });
   });
 });
