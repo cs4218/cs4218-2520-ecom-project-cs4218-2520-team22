@@ -96,6 +96,7 @@ const CreateCategory = () => {
             <h1>Manage Category</h1>
             <div className="p-3 w-50">
               <CategoryForm
+                ariaLabel="create-category-input"
                 handleSubmit={handleSubmit}
                 value={name}
                 setValue={setName}
@@ -111,31 +112,29 @@ const CreateCategory = () => {
                 </thead>
                 <tbody>
                   {categories?.map((c) => (
-                    <>
-                      <tr>
-                        <td key={c._id}>{c.name}</td>
-                        <td>
-                          <button
-                            className="btn btn-primary ms-2"
-                            onClick={() => {
-                              setVisible(true);
-                              setUpdatedName(c.name);
-                              setSelected(c);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-danger ms-2"
-                            onClick={() => {
-                              handleDelete(c._id);
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    </>
+                    <tr key={c._id}>
+                      <td>{c.name}</td>
+                      <td>
+                        <button
+                          className="btn btn-primary ms-2"
+                          onClick={() => {
+                            setVisible(true);
+                            setUpdatedName(c.name);
+                            setSelected(c);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-danger ms-2"
+                          onClick={() => {
+                            handleDelete(c._id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -146,6 +145,7 @@ const CreateCategory = () => {
               visible={visible}
             >
               <CategoryForm
+                ariaLabel="update-category-input"
                 value={updatedName}
                 setValue={setUpdatedName}
                 handleSubmit={handleUpdate}
