@@ -293,6 +293,7 @@ describe('Login Component', () => {
       data: { message: 'Server error' }
     };
     axios.post.mockRejectedValueOnce(error);
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={['/login']}>
@@ -309,5 +310,6 @@ describe('Login Component', () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+    expect(console.log).toHaveBeenCalled();
   });
 });

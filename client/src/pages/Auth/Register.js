@@ -27,7 +27,6 @@ const Register = () => {
         DOB,
         answer,
       });
-      console.log(res);
       if (res && res.data.success) {
         toast.success("Registered Successfully, please login");
         navigate("/login");

@@ -224,6 +224,7 @@ describe('ForgotPassword Component', () => {
       data: { message: 'Server error' }
     };
     axios.post.mockRejectedValueOnce(error);
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={['/forgot-password']}>
@@ -241,6 +242,7 @@ describe('ForgotPassword Component', () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+    expect(console.log).toHaveBeenCalledWith(error);
   });
 
 });

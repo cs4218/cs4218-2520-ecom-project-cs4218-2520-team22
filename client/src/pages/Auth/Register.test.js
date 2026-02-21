@@ -328,6 +328,7 @@ describe('Register Component', () => {
       data: { message: 'Server error' }
     };
     axios.post.mockResolvedValueOnce(error);
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={['/register']}>
@@ -349,5 +350,6 @@ describe('Register Component', () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+    expect(console.log).toHaveBeenCalled();
   });
 });
