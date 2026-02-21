@@ -24,15 +24,12 @@ export default {
 
   // exclude _site directory (generated build files)
   testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
-
-
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
+    "client/src/**/*.js",
     "!client/src/_site/**/*.js",
     "!client/src/**/*.test.js",
-    "client/src/context/*.js",
-    "client/src/pages/Auth/*.js",
   ],
   coverageThreshold: {
     global: {

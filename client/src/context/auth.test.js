@@ -1,7 +1,6 @@
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import axios from 'axios';
-import { MemoryRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, AuthProvider } from './auth';
 
 jest.mock('axios');
