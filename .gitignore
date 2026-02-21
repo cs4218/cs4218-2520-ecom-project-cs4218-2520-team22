@@ -5,5 +5,4 @@ node_modules
 /playwright/.cache/
 *.tex
 *.env
-
 coverage/
