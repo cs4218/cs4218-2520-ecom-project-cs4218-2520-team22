@@ -1,10 +1,10 @@
-import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import axios from 'axios';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import '@testing-library/jest-dom/extend-expect';
-import toast from 'react-hot-toast';
-import Register from './Register';
+import React from "react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
+import axios from "axios";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
+import "@testing-library/jest-dom/extend-expect";
+import toast from "react-hot-toast";
+import Register from "./Register";
 
 // Mocking axios.post
 jest.mock('axios');
@@ -30,9 +30,10 @@ jest.mock('../../context/search', () => ({
   useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
 }));
 
-describe('Register Component', () => {
+describe("Register Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    axios.get.mockResolvedValueOnce({ data: { category: [] } });
   });
 
   // added the test case, Daniel Lai, A0192327A

@@ -20,16 +20,16 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/**/*.test.js"],
+  testMatch: ["<rootDir>/client/src/**/*.test.js","<rootDir>/client/src/**/*.test.jsx"],
 
   // exclude _site directory (generated build files)
   testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
-    "client/src/**/*.js",
-    "!client/src/_site/**/*.js",
-    "!client/src/**/*.test.js",
+    "client/src/**/*.{js,jsx}",
+    "!client/src/_site/**",
+    "!client/src/**/*.test.{js,jsx}",
   ],
   coverageThreshold: {
     global: {
@@ -38,4 +38,5 @@ export default {
     },
   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
+
 };
