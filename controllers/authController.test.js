@@ -8,7 +8,6 @@ import {
   forgotPasswordController,
   testController
 } from "./authController.js";
-import { describe } from "node:test";
 import jestBackendConfig from "../jest.backend.config.js";
 
 jest.mock("../models/userModel.js");
