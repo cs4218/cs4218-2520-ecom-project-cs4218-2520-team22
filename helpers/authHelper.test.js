@@ -9,6 +9,7 @@ describe("authHelper Component", () => {
   });
 
 
+  // added the test case, Daniel Lai, A0192327A
   // Most of the tests should be handled at the integration testing level, except for error handling in hashPassword
   // Since this is a wrapper around a external dependency
   it("should handle bcrypt.hash errors gracefully", async () => {
@@ -19,6 +20,6 @@ describe("authHelper Component", () => {
     const result = await hashPassword("testpassword"); // Act
 
     expect(console.log).toHaveBeenCalledWith(mockError);
-    expect(result).toBeUndefined(); // Function returns undefined when error occurs
+    expect(result).toBeUndefined();
   });
 });

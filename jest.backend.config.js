@@ -19,6 +19,7 @@ export default {
   collectCoverageFrom: [
     "helpers/**/*.js",
     "middlewares/**/*.js",
+    "controllers/**/*.js",
     // "**/*.js",
     "!node_modules/**",
     "!coverage/**",

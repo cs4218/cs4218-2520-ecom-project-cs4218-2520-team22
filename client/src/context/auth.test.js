@@ -42,8 +42,9 @@ describe('Auth Context Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  
 
+
+  // added the test case, Daniel Lai, A0192327A
   it('auth and headers should not be set if localStorage is empty', () => {
     const { getByTestId } = render(
       <AuthProvider>
@@ -56,6 +57,7 @@ describe('Auth Context Component', () => {
     expect(axios.defaults.headers.common["Authorization"]).toBe("");
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it('auth and headers should be set if localStorage has valid data', () => {
     const mockAuthData = {
       user: { name: "Test User" },
@@ -74,6 +76,7 @@ describe('Auth Context Component', () => {
     expect(axios.defaults.headers.common["Authorization"]).toBe("test-token");
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it('auth and headers should not be set if localStorage has null data', () => {
     localStorage.getItem.mockReturnValue(null);
 
@@ -88,6 +91,7 @@ describe('Auth Context Component', () => {
     expect(axios.defaults.headers.common["Authorization"]).toBe("");
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it('auth and headers should not be set if localStorage has undefined data', () => {
     localStorage.getItem.mockReturnValue(undefined);
 
@@ -102,6 +106,7 @@ describe('Auth Context Component', () => {
     expect(axios.defaults.headers.common["Authorization"]).toBe("");
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it('auth and headers should not be set or throw uncaught errors if localStorage has invalid data', () => {
     localStorage.getItem.mockReturnValue("invalid-json");
     jest.spyOn(console, 'log').mockImplementation(() => { });

@@ -160,6 +160,7 @@ describe('ForgotPassword Component', () => {
     expect(mockedUseNavigate).toHaveBeenCalledWith('/login');
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it('should reset password successfully', async () => {
     axios.post.mockResolvedValueOnce({ data: { success: true } });
 
@@ -189,6 +190,7 @@ describe('ForgotPassword Component', () => {
     expect(mockedUseNavigate).toHaveBeenCalledWith('/login');
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it('should display error message on failed password reset', async () => {
     axios.post.mockResolvedValueOnce({
       data: {
@@ -224,7 +226,7 @@ describe('ForgotPassword Component', () => {
       data: { message: 'Server error' }
     };
     axios.post.mockRejectedValueOnce(error);
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation(() => { });
 
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={['/forgot-password']}>
