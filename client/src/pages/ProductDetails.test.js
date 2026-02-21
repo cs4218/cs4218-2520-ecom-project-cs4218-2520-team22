@@ -179,4 +179,38 @@ describe("ProductDetails", () => {
 
     expect(mockNavigate).toHaveBeenCalledWith("/product/relprod");
   });
+
+  it("doesn't fetch product when slug is missing", async () => {
+    useParams.mockReturnValue({});
+    render(<ProductDetails />);
+    await waitFor(() => {
+      expect(axios.get).not.toHaveBeenCalled();
+    });
+  });
+
+  it("logs error when fetching similar products fails", async () => {
+    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    const productData = {
+      product: {
+        _id: "p1",
+        name: "Test Product",
+        description: "Desc",
+        price: 100,
+        category: { _id: "c1", name: "Cat1" },
+      },
+    };
+
+    axios.get
+      .mockResolvedValueOnce({ data: productData })
+      .mockRejectedValueOnce(new Error("API error"));
+
+    render(<ProductDetails />);
+
+    await waitFor(() => {
+      expect(logSpy).toHaveBeenCalledWith(new Error("API error"));
+    });
+
+    logSpy.mockRestore();
+  });
 });

@@ -113,4 +113,12 @@ describe("CategoryProduct", () => {
     moreDetailsBtn.click();
     expect(mockNavigate).toHaveBeenCalledWith("/product/prod1");
   });
+
+  it("doesn't fetch products when slug is missing", async () => {
+    useParams.mockReturnValue({});
+    render(<CategoryProduct />);
+    await waitFor(() => {
+      expect(axios.get).not.toHaveBeenCalled();
+    });
+  });
 });
