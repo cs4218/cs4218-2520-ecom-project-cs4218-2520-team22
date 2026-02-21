@@ -349,7 +349,11 @@ export const brainTreePaymentController = async (req, res) => {
     const { nonce, cart } = req.body;
     let total = 0;
     cart.map((i) => {
-      total += i.price;
+      if (isFinite(i.price)) {
+        total += i.price;
+      } else {
+        throw new Error("Price is invalid for product")
+      }
     });
     let newTransaction = gateway.transaction.sale(
       {
