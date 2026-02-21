@@ -1,3 +1,4 @@
+// Written by Qinzhe Wang A0337880U
 import fs from "fs";
 import slugify from "slugify";
 import productModel from "../../../models/productModel";

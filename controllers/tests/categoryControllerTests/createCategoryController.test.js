@@ -1,13 +1,14 @@
+// Written by Qinzhe Wang A0337880U
 import {createCategoryController} from "../../categoryController";
 import categoryModel from "../../../models/categoryModel";
 
-// 1) mock slugify，让它可预测
+
 jest.mock("slugify", () => jest.fn((s) => `slug-${s}`));
 
-// 2) mock categoryModel：既要 mock 静态方法 findOne，又要 mock 构造 + save
+
 jest.mock("../../../models/categoryModel", () => {
-    const ctor = jest.fn();           // 用来 mock new categoryModel(...)
-    ctor.findOne = jest.fn();         // 用来 mock categoryModel.findOne(...)
+    const ctor = jest.fn();
+    ctor.findOne = jest.fn();
     return ctor;
 });
 
@@ -77,7 +78,6 @@ describe("createCategoryController", () => {
 
         expect(categoryModel.findOne).toHaveBeenCalledWith({ name: "Electronics" });
 
-        // 确认构造时传的 doc 合理（含 slug）
         expect(categoryModel).toHaveBeenCalledWith({
             name: "Electronics",
             slug: "slug-Electronics",

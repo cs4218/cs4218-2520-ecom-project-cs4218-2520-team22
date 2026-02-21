@@ -1,3 +1,4 @@
+// Written by Qinzhe Wang A0337880U
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import Products from "../pages/admin/Products";
