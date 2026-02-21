@@ -1,9 +1,38 @@
-node_modules
+# Original
 /test-results/
-/playwright-report/
 /blob-report/
-/playwright/.cache/
 *.tex
-*.env
 
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Coverage
 coverage/
+
+# Playwright
+playwright-report/
+/playwright/.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary debug files
+*.tmp
+*.temp
+*.bak
