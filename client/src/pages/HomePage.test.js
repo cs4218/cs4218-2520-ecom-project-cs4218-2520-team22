@@ -7,9 +7,13 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 // Mocks
-jest.mock("../components/Layout", () => ({
+jest.mock("./../components/Layout", () => ({
     __esModule: true,
-    default: ({ children }) => <div>{children}</div>,
+    default: ({ children, title }) => (
+      <div data-testid="layout-mock" title={title}>
+        {children}
+      </div>
+    ),
 }));
 
 jest.mock("react-hot-toast");
@@ -25,6 +29,10 @@ jest.mock("../components/Prices", () => ({
         { _id: "1", name: "$0 - 19", array: [0, 19] },
         { _id: "2", name: "$20 - 39", array: [20, 39] }
     ],
+}));
+
+jest.mock("react-icons/ai", () => ({
+  AiOutlineReload: () => <svg data-testid="reload-icon" />,
 }));
 
 const mockNavigate = jest.fn();
@@ -192,12 +200,10 @@ describe("Home Page renders", () => {
 
             renderPage();
 
-            await waitFor(async () => {
-                const button = await screen.findByRole("button", { name: "Loadmore" });
-                expect(button).toBeInTheDocument();
-                const icon = button.querySelector("svg");
-                expect(icon).toBeInTheDocument()
-            })
+            const button = await screen.findByRole("button", { name: /Loadmore/i });
+            expect(button).toBeInTheDocument();
+
+            expect(screen.getByTestId("reload-icon")).toBeInTheDocument();
         });
     });
 

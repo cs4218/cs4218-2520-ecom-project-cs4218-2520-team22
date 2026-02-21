@@ -42,7 +42,7 @@ const HomePage = () => {
       setLoading(true);
       const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
       setLoading(false);
-      setProducts(data.products);
+      setProducts(data?.products || []);
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -69,7 +69,7 @@ const HomePage = () => {
       setLoading(true);
       const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
       setLoading(false);
-      setProducts([...products, ...data?.products]);
+      setProducts((prev) => [...prev, ...(data?.products || [])]);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -101,7 +101,7 @@ const HomePage = () => {
         checked,
         radio,
       });
-      setProducts(data?.products);
+      setProducts(data?.products || []);
     } catch (error) {
       console.log(error);
     }
