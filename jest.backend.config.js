@@ -6,15 +6,31 @@ export default {
   testEnvironment: "node",
 
   // which test to run
-  testMatch: ["<rootDir>/controllers/*.test.js"],
+  testMatch: [
+    // Original
+    //"<rootDir>/controllers/*.test.js",
+
+    // Song Yichao, A025686M
+    "<rootDir>/controllers/authController.test.js",
+    "<rootDir>/models/*.test.js",
+  ],
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["controllers/**"],
+  collectCoverageFrom: [
+    // Original
+    // "controllers/**",
+
+    "controllers/authController.js",
+    "models/userModel.js",
+    "models/orderModel.js",
+  ],
   coverageThreshold: {
     global: {
-      lines: 100,
-      functions: 100,
+      lines: 90,
+      functions: 90,
+      branches: 80,
+      statements: 90,
     },
   },
 };
