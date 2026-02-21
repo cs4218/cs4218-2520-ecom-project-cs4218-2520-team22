@@ -8,18 +8,19 @@ describe("authHelper Component", () => {
     jest.clearAllMocks();
   });
 
+  describe("hashPassword Function", () => {
+    // added the test case, Daniel Lai, A0192327A
+    // Most of the tests should be handled at the integration testing level, except for error handling in hashPassword
+    // Since this is a wrapper around a external dependency
+    it("should handle bcrypt.hash errors gracefully", async () => {
+      const mockError = new Error("Bcrypt hashing failed");
+      bcrypt.hash.mockRejectedValue(mockError);
+      jest.spyOn(console, 'log').mockImplementation(() => { });
 
-  // added the test case, Daniel Lai, A0192327A
-  // Most of the tests should be handled at the integration testing level, except for error handling in hashPassword
-  // Since this is a wrapper around a external dependency
-  it("should handle bcrypt.hash errors gracefully", async () => {
-    const mockError = new Error("Bcrypt hashing failed");
-    bcrypt.hash.mockRejectedValue(mockError);
-    jest.spyOn(console, 'log').mockImplementation(() => { });
+      const result = await hashPassword("testpassword"); // Act
 
-    const result = await hashPassword("testpassword"); // Act
-
-    expect(console.log).toHaveBeenCalledWith(mockError);
-    expect(result).toBeUndefined();
+      expect(console.log).toHaveBeenCalledWith(mockError);
+      expect(result).toBeUndefined();
+    });
   });
 });
