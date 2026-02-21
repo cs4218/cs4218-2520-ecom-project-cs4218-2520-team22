@@ -10,7 +10,7 @@ export default {
     // Original
     //"<rootDir>/controllers/*.test.js",
 
-    // Song Yichao, A025686M
+    // Song Yichao, A0255686M
     "<rootDir>/controllers/authController.test.js",
     "<rootDir>/models/*.test.js",
   ],
