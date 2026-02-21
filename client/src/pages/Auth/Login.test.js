@@ -10,6 +10,8 @@ import Login from './Login';
 jest.mock('axios');
 jest.mock('react-hot-toast');
 
+jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
+
 jest.mock('../../context/auth', () => ({
     useAuth: jest.fn(() => [null, jest.fn()]) // Mock useAuth hook to return null state and a mock function for setAuth
   }));
@@ -42,6 +44,7 @@ window.matchMedia = window.matchMedia || function() {
 describe('Login Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        axios.get.mockResolvedValue({ data: { category: [] } });
     });
 
     it('renders login form', () => {
