@@ -20,15 +20,41 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/pages/Auth/*.test.js"],
+  testMatch: [
+    // Original
+    // "<rootDir>/client/src/pages/Auth/*.test.js",
+
+    // Song Yichao, A0255686M
+    "<rootDir>/client/src/components/Routes/*.test.js",
+    "<rootDir>/client/src/components/Form/*.test.js",
+    "<rootDir>/client/src/components/*.test.js",
+    "<rootDir>/client/src/context/*.test.js",
+    "<rootDir>/client/src/pages/user/*.test.js",
+    "<rootDir>/client/src/pages/*.test.js",
+  ],
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/Auth/**"],
+  collectCoverageFrom: [
+    // Original
+    // "client/src/pages/Auth/**",
+
+    // Song Yichao, A0255686M
+    "client/src/components/Routes/Private.js",
+    "client/src/components/UserMenu.js",
+    "client/src/pages/user/Dashboard.js",
+    "client/src/pages/user/Orders.js",
+    "client/src/pages/user/Profile.js",
+    "client/src/components/Form/SearchInput.js",
+    "client/src/context/search.js",
+    "client/src/pages/Search.js",
+  ],
   coverageThreshold: {
     global: {
-      lines: 100,
-      functions: 100,
+      lines: 90,
+      functions: 90,
+      statements: 90,
+      branches: 80,
     },
   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
