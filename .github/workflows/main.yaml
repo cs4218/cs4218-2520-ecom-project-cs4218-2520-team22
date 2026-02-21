@@ -1,0 +1,38 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches: 
+      - main
+      - staging
+  push:
+    branches: 
+      - main
+      - staging
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install client dependencies
+        run: |
+          cd client
+          npm install
+      
+      - name: Run backend tests
+        run: npm run test:backend
+
+      - name: Run frontend tests
+        run: npm run test:frontned
