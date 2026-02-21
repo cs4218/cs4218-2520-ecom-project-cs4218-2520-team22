@@ -3,16 +3,27 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import Contact from "./Contact";
-import Layout from "../components/Layout";
 
-jest.mock("../components/Layout", () => ({
-  __esModule: true,
-  default: ({ children, ...props }) => (
-    <div data-testid="layout-mock" {...props}>
-      {children}
-    </div>
-  ),
-}));
+jest.mock("../components/Layout", () => {
+  const React = require("react");
+  const LayoutMock = ({ children, title, ...rest }) =>
+    React.createElement(
+      "div",
+      { "data-testid": "layout-mock", title, ...rest },
+      children
+    );
+
+  return { __esModule: true, default: LayoutMock };
+});
+
+jest.mock("react-icons/bi", () => {
+  const React = require("react");
+  return {
+    BiMailSend: () => React.createElement("span"),
+    BiPhoneCall: () => React.createElement("span"),
+    BiSupport: () => React.createElement("span"),
+  };
+});
 
 const CONTACT_INFO = {
   email: "help@ecommerceapp.com",
