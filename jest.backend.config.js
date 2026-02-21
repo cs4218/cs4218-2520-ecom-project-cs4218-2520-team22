@@ -17,14 +17,12 @@ export default {
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
-    "helpers/**/*.js",
-    "middlewares/**/*.js",
-    "controllers/**/*.js",
-    // "**/*.js",
+    "**/*.js",
     "!node_modules/**",
     "!coverage/**",
     "!playwright-report/**",
-
+    "!client/**",
+    "!**/*.config.js",
   ],
   coverageThreshold: {
     global: {
