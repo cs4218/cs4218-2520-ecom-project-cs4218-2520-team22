@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor,screen } from '@testing-library/react';
 import axios from 'axios';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom/extend-expect';
@@ -12,6 +12,7 @@ jest.mock('react-hot-toast');
 
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
 
+jest.mock("../../components/Header", () => () => null);
 jest.mock('../../context/auth', () => ({
     useAuth: jest.fn(() => [null, jest.fn()]) // Mock useAuth hook to return null state and a mock function for setAuth
   }));
@@ -19,10 +20,10 @@ jest.mock('../../context/auth', () => ({
   jest.mock('../../context/cart', () => ({
     useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function
   }));
-    
+
 jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
-  }));  
+  }));
 
   Object.defineProperty(window, 'localStorage', {
     value: {
@@ -39,7 +40,7 @@ window.matchMedia = window.matchMedia || function() {
       addListener: function() {},
       removeListener: function() {}
     };
-  };  
+  };
 
 describe('Login Component', () => {
     beforeEach(() => {
@@ -47,15 +48,15 @@ describe('Login Component', () => {
         axios.get.mockResolvedValue({ data: { category: [] } });
     });
 
-    it('renders login form', () => {
-        const { getByText, getByPlaceholderText } = render(
-          <MemoryRouter initialEntries={['/login']}>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </MemoryRouter>
+    it('renders login form', async () => {
+        const {getByText, getByPlaceholderText} = render(
+            <MemoryRouter initialEntries={['/login']}>
+                <Routes>
+                    <Route path="/login" element={<Login/>}/>
+                </Routes>
+            </MemoryRouter>
         );
-    
+
         expect(getByText('LOGIN FORM')).toBeInTheDocument();
         expect(getByPlaceholderText('Enter Your Email')).toBeInTheDocument();
         expect(getByPlaceholderText('Enter Your Password')).toBeInTheDocument();
@@ -68,12 +69,12 @@ describe('Login Component', () => {
             </Routes>
           </MemoryRouter>
         );
-    
+
         expect(getByText('LOGIN FORM')).toBeInTheDocument();
         expect(getByPlaceholderText('Enter Your Email').value).toBe('');
         expect(getByPlaceholderText('Enter Your Password').value).toBe('');
       });
-    
+
       it('should allow typing email and password', () => {
         const { getByText, getByPlaceholderText } = render(
           <MemoryRouter initialEntries={['/login']}>
@@ -87,7 +88,7 @@ describe('Login Component', () => {
         expect(getByPlaceholderText('Enter Your Email').value).toBe('test@example.com');
         expect(getByPlaceholderText('Enter Your Password').value).toBe('password123');
       });
-      
+
     it('should login the user successfully', async () => {
         axios.post.mockResolvedValueOnce({
             data: {
@@ -110,14 +111,14 @@ describe('Login Component', () => {
         fireEvent.click(getByText('LOGIN'));
 
         await waitFor(() => expect(axios.post).toHaveBeenCalled());
-        expect(toast.success).toHaveBeenCalledWith(undefined, {
+        await waitFor(() => expect(toast.success).toHaveBeenCalledWith(undefined, {
             duration: 5000,
             icon: '🙏',
             style: {
                 background: 'green',
                 color: 'white'
             }
-        });
+        }));
     });
 
     it('should display error message on failed login', async () => {
@@ -136,6 +137,6 @@ describe('Login Component', () => {
         fireEvent.click(getByText('LOGIN'));
 
         await waitFor(() => expect(axios.post).toHaveBeenCalled());
-        expect(toast.error).toHaveBeenCalledWith('Something went wrong');
+        await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Something went wrong'));
     });
 });

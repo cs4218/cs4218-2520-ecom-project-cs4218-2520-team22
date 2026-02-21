@@ -58,4 +58,5 @@ export default {
     },
   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
+
 };
