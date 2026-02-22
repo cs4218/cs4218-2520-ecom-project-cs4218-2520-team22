@@ -1,7 +1,7 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
 
-import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
+import { comparePassword, hashPassword } from "../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
 
 export const registerController = async (req, res) => {
@@ -116,18 +116,17 @@ export const loginController = async (req, res) => {
 };
 
 //forgotPasswordController
-
 export const forgotPasswordController = async (req, res) => {
   try {
     const { email, answer, newPassword } = req.body;
     if (!email) {
-      res.status(400).send({ message: "Email is required" });
+      return res.status(400).send({ message: "Email is required" });
     }
     if (!answer) {
-      res.status(400).send({ message: "Answer is required" });
+      return res.status(400).send({ message: "Answer is required" });
     }
     if (!newPassword) {
-      res.status(400).send({ message: "New Password is required" });
+      return res.status(400).send({ message: "New Password is required" });
     }
     //check
     const user = await userModel.findOne({ email, answer });
@@ -160,7 +159,6 @@ export const testController = (req, res) => {
     res.send("Protected Routes");
   } catch (error) {
     console.log(error);
-    res.send({ error });
   }
 };
 
@@ -223,13 +221,13 @@ export const getAllOrdersController = async (req, res) => {
       .find({})
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: "-1" });
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Getting Orders",
+      message: "Error While Getting All Orders",
       error,
     });
   }

@@ -4,6 +4,7 @@ import Layout from "./../../components/Layout";
 import { useAuth } from "../../context/auth";
 import toast from "react-hot-toast";
 import axios from "axios";
+
 const Profile = () => {
   //context
   const [auth, setAuth] = useAuth();
@@ -16,11 +17,12 @@ const Profile = () => {
 
   //get user data
   useEffect(() => {
-    const { email, name, phone, address } = auth?.user;
-    setName(name);
-    setPhone(phone);
-    setEmail(email);
-    setAddress(address);
+    if (!auth?.user) return;
+    const { email, name, phone, address } = auth.user;
+    setName(name ?? "");
+    setPhone(phone ?? "");
+    setEmail(email ?? "");
+    setAddress(address ?? "");
   }, [auth?.user]);
 
   // form function
@@ -39,7 +41,11 @@ const Profile = () => {
       } else {
         setAuth({ ...auth, user: data?.updatedUser });
         let ls = localStorage.getItem("auth");
-        ls = JSON.parse(ls);
+        try {
+          ls = ls ? JSON.parse(ls) : {};
+        } catch {
+          ls = {};
+        }
         ls.user = data.updatedUser;
         localStorage.setItem("auth", JSON.stringify(ls));
         toast.success("Profile Updated Successfully");
@@ -75,7 +81,8 @@ const Profile = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    // Disabling email changes, enable when emails can be verified
+                    // onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
                     id="exampleInputEmail1"
                     placeholder="Enter Your Email "

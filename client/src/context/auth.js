@@ -13,16 +13,19 @@ const AuthProvider = ({ children }) => {
     axios.defaults.headers.common["Authorization"] = auth?.token;
 
     useEffect(() => {
-       const data = localStorage.getItem("auth");
-       if (data) {
-        const parseData = JSON.parse(data);
-        setAuth({
-            ...auth,
-            user: parseData.user,
-            token: parseData.token,
-        });
-       }
-       //eslint-disable-next-line
+        const data = localStorage.getItem("auth");
+        try {
+            if (data) {
+                const parseData = JSON.parse(data);
+                setAuth({
+                    ...auth,
+                    user: parseData.user,
+                    token: parseData.token,
+                });
+            }
+        } catch (error) {
+            console.log("Something went wrong with localStorage", error);
+        }
     }, []);
     return (
         <AuthContext.Provider value={[auth, setAuth]}>
@@ -34,4 +37,4 @@ const AuthProvider = ({ children }) => {
 // custom hook
 const useAuth = () => useContext(AuthContext);
 
-export {useAuth, AuthProvider};
+export { useAuth, AuthProvider };
