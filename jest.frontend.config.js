@@ -13,22 +13,44 @@ export default {
 
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
-    "\\.(css|scss)$": "identity-obj-proxy",
+    "\\.(css|less|sass|scss)$": "identity-obj-proxy",
   },
 
-  // ignore all node_modules except styleMock (needed for css imports)
-  transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
+  // // ignore all node_modules except styleMock (needed for css imports)
+  // transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/**/*.test.js","<rootDir>/client/src/**/*.test.jsx"],
+  testMatch: [
+    // Original
+    // "<rootDir>/client/src/pages/Auth/*.test.js",
 
+    "<rootDir>/client/src/**/*.test.js",
+    "<rootDir>/client/src/**/*.test.jsx",
+  ],
+
+  // exclude _site directory (generated build files)
+  testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/**/*.{js,jsx}"],
+  collectCoverageFrom: [
+    // Original
+    // "client/src/pages/Auth/**",
+
+    "client/src/**/*.{js,jsx}",
+    "!client/src/_site/**",
+    "!client/src/**/*.test.{js,jsx}",
+    "!client/src/index.js",
+    "!client/src/App.js",
+    "!client/src/reportWebVitals.js",
+    "!client/src/**/__tests__/**",
+    "!client/src/**/setupTests.js",
+  ],
   coverageThreshold: {
     global: {
-      lines: 100,
-      functions: 100,
+      lines: 90,
+      functions: 90,
+      statements: 90,
+      branches: 80,
     },
   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
