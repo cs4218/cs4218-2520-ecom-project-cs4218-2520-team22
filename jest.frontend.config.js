@@ -28,6 +28,8 @@ export default {
     "<rootDir>/client/src/**/*.test.jsx",
   ],
 
+  // exclude _site directory (generated build files)
+  testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [

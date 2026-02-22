@@ -43,7 +43,7 @@ const Register = () => {
     <Layout title="Register - Ecommerce App">
       <div className="form-container" style={{ minHeight: "90vh" }}>
         <form onSubmit={handleSubmit}>
-          <h4 className="title">REGISTER FORM</h4>
+          <h4 className="title">REGISTRATION FORM</h4>
           <div className="mb-3">
             <input
               type="text"
@@ -63,7 +63,7 @@ const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="form-control"
               id="exampleInputEmail1"
-              placeholder="Enter Your Email "
+              placeholder="Enter Your Email"
               required
             />
           </div>
@@ -80,7 +80,7 @@ const Register = () => {
           </div>
           <div className="mb-3">
             <input
-              type="text"
+              type="text" // avoid user facing unexpected input validation error
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="form-control"
@@ -102,7 +102,7 @@ const Register = () => {
           </div>
           <div className="mb-3">
             <input
-              type="Date"
+              type="date"
               value={DOB}
               onChange={(e) => setDOB(e.target.value)}
               className="form-control"
@@ -118,7 +118,7 @@ const Register = () => {
               onChange={(e) => setAnswer(e.target.value)}
               className="form-control"
               id="exampleInputanswer1"
-              placeholder="What is Your Favorite sports"
+              placeholder="What is Your Favorite Sports?"
               required
             />
           </div>
