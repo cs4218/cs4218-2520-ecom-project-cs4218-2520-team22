@@ -9,7 +9,7 @@ import Register from './Register';
 // Mocking axios.post
 jest.mock('axios');
 jest.mock('react-hot-toast');
-
+jest.mock("../../components/Header", () => () => null);
 jest.mock('../../context/auth', () => ({
     useAuth: jest.fn(() => [null, jest.fn()]) // Mock useAuth hook to return null state and a mock function for setAuth
   }));
@@ -17,10 +17,10 @@ jest.mock('../../context/auth', () => ({
   jest.mock('../../context/cart', () => ({
     useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function
   }));
-    
+
 jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
-  }));  
+  }));
 
   Object.defineProperty(window, 'localStorage', {
     value: {
@@ -38,11 +38,12 @@ window.matchMedia = window.matchMedia || function() {
       removeListener: function() {}
     };
   };
-      
+
 
 describe('Register Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    axios.get.mockResolvedValue({ data: { category: [] } });
   });
 
   it('should register the user successfully', async () => {

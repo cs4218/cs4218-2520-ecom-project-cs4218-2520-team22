@@ -85,11 +85,11 @@ const CartPage = () => {
             <h1 className="text-center bg-light p-2 mb-1">
               {!auth?.user
                 ? "Hello Guest"
-                : `Hello  ${auth?.token && auth?.user?.name}`}
+                : `Hello  ${auth?.user.name}`}
               <p className="text-center">
                 {cart?.length
                   ? `You Have ${cart.length} items in your cart ${
-                      auth?.token ? "" : "please login to checkout !"
+                      auth?.token ? "" : "please login to checkout!"
                     }`
                   : " Your Cart Is Empty"}
               </p>
@@ -113,7 +113,7 @@ const CartPage = () => {
                   <div className="col-md-4">
                     <p>{p.name}</p>
                     <p>{p.description.substring(0, 30)}</p>
-                    <p>Price : {p.price}</p>
+                    <p>Price: {p.price}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
                     <button
@@ -131,21 +131,15 @@ const CartPage = () => {
               <p>Total | Checkout | Payment</p>
               <hr />
               <h4>Total : {totalPrice()} </h4>
-              {auth?.user?.address ? (
+              {auth?.user?.address && (
                 <>
                   <div className="mb-3">
                     <h4>Current Address</h4>
                     <h5>{auth?.user?.address}</h5>
-                    <button
-                      className="btn btn-outline-warning"
-                      onClick={() => navigate("/dashboard/user/profile")}
-                    >
-                      Update Address
-                    </button>
                   </div>
                 </>
-              ) : (
-                <div className="mb-3">
+              )}
+              <div className="mb-3">
                   {auth?.token ? (
                     <button
                       className="btn btn-outline-warning"
@@ -162,11 +156,10 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Plase Login to checkout
+                      Please Login to checkout
                     </button>
                   )}
-                </div>
-              )}
+              </div>  
               <div className="mt-2">
                 {!clientToken || !auth?.token || !cart?.length ? (
                   ""

@@ -62,6 +62,10 @@ const UpdateProduct = () => {
   //create product function
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (!id) {
+      toast.error("Product not loaded yet");
+      return;
+    }
     try {
       const productData = new FormData();
       productData.append("name", name);
@@ -70,11 +74,11 @@ const UpdateProduct = () => {
       productData.append("quantity", quantity);
       photo && productData.append("photo", photo);
       productData.append("category", category);
-      const { data } = axios.put(
+      const { data } = await axios.put(
         `/api/v1/product/update-product/${id}`,
         productData
       );
-      if (data?.success) {
+      if (!data?.success) {
         toast.error(data?.message);
       } else {
         toast.success("Product Updated Successfully");
@@ -88,6 +92,10 @@ const UpdateProduct = () => {
 
   //delete a product
   const handleDelete = async () => {
+    if (!id) {
+      toast.error("Product not loaded yet");
+      return;
+    }
     try {
       let answer = window.prompt("Are You Sure want to delete this product ? ");
       if (!answer) return;
@@ -113,6 +121,7 @@ const UpdateProduct = () => {
             <div className="m-1 w-75">
               <Select
                 bordered={false}
+                aria-label="category-select"
                 placeholder="Select a category"
                 size="large"
                 showSearch
@@ -132,6 +141,7 @@ const UpdateProduct = () => {
                 <label className="btn btn-outline-secondary col-md-12">
                   {photo ? photo.name : "Upload Photo"}
                   <input
+                    aria-label="photo-input"
                     type="file"
                     name="photo"
                     accept="image/*"
@@ -151,14 +161,15 @@ const UpdateProduct = () => {
                     />
                   </div>
                 ) : (
-                  <div className="text-center">
-                    <img
-                      src={`/api/v1/product/product-photo/${id}`}
-                      alt="product_photo"
-                      height={"200px"}
-                      className="img img-responsive"
-                    />
-                  </div>
+                    id && (<div className="text-center">
+                      <img
+                        src={`/api/v1/product/product-photo/${id}`}
+                        alt="product_photo"
+                        height={"200px"}
+                        className="img img-responsive"
+                      />
+                    </div>
+                  )
                 )}
               </div>
               <div className="mb-3">
@@ -201,6 +212,7 @@ const UpdateProduct = () => {
               <div className="mb-3">
                 <Select
                   bordered={false}
+                  aria-label="shipping-select"
                   placeholder="Select Shipping "
                   size="large"
                   showSearch
@@ -215,12 +227,12 @@ const UpdateProduct = () => {
                 </Select>
               </div>
               <div className="mb-3">
-                <button className="btn btn-primary" onClick={handleUpdate}>
+                <button className="btn btn-primary" onClick={handleUpdate} disabled={!id}>
                   UPDATE PRODUCT
                 </button>
               </div>
               <div className="mb-3">
-                <button className="btn btn-danger" onClick={handleDelete}>
+                <button className="btn btn-danger" onClick={handleDelete} disabled={!id}>
                   DELETE PRODUCT
                 </button>
               </div>
