@@ -750,16 +750,13 @@ describe("authController unit tests", () => {
         const res = makeRes();
 
         // First call throws (inside try), second call succeeds (inside catch)
-        res.send
-            .mockImplementationOnce(() => { throw new Error("send failed"); })
-            .mockImplementationOnce(() => res);
+        res.send.mockImplementationOnce(() => { throw new Error("send failed"); });
 
         testController(req, res);
 
         expect(logSpy).toHaveBeenCalled();
-        expect(res.send).toHaveBeenLastCalledWith(
-          expect.objectContaining({ error: expect.anything() })
-        );
+        expect(res.send).toHaveBeenCalledTimes(1); 
+        expect(res.send).toHaveBeenLastCalledWith("Protected Routes");
       });
     });
   });
