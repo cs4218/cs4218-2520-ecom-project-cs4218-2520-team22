@@ -14,7 +14,6 @@ export default {
     "<rootDir>/models/*.test.js",
     "<rootDir>/helpers/*.test.js",
     "<rootDir>/config/*.test.js",
-    "<rootDir>/routes/*.test.js",
     "<rootDir>/middlewares/*.test.js",
   ],
 
@@ -25,6 +24,8 @@ export default {
     // "controllers/**",
 
     "**/*.js",
+    "!routes/**",
+    "!server.js",
     "!node_modules/**",
     "!coverage/**",
     "!playwright-report/**",

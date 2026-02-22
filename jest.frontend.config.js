@@ -39,6 +39,11 @@ export default {
     "client/src/**/*.{js,jsx}",
     "!client/src/_site/**",
     "!client/src/**/*.test.{js,jsx}",
+    "!client/src/index.js",
+    "!client/src/App.js",
+    "!client/src/reportWebVitals.js",
+    "!client/src/**/__tests__/**",
+    "!client/src/**/setupTests.js",
   ],
   coverageThreshold: {
     global: {
