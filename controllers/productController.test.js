@@ -9,14 +9,29 @@ import {
   relatedProductController,
   productCategoryController,
   braintreeTokenController,
-  brainTreePaymentController,
+  brainTreePaymentController, createProductController, deleteProductController, updateProductController,
 } from "./productController";
 import productModel from "../models/productModel";
 import categoryModel from "../models/categoryModel";
 import orderModel from "../models/orderModel";
 import { mockGenerate, mockSale } from "braintree";
+import fs from "fs";
+import slugify from "slugify";
 
-jest.mock("../models/productModel");
+
+jest.mock("fs", () => ({
+  readFileSync: jest.fn(),
+}));
+
+jest.mock("slugify", () => jest.fn((s) => `slug-${s}`));
+jest.mock("../models/productModel",
+    () => {
+      const ctor = jest.fn();
+      ctor.findOne = jest.fn();
+      ctor.findByIdAndDelete = jest.fn();
+      ctor.findByIdAndUpdate = jest.fn()
+      return ctor;
+    });
 jest.mock("../models/categoryModel");
 jest.mock("../models/orderModel");
 
@@ -43,6 +58,14 @@ jest.mock("braintree", () => {
     mockSale,
   };
 });
+
+function mockRes() {
+  const res = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.send = jest.fn().mockReturnValue(res);
+  return res;
+}
+
 
 beforeAll(() => {
   jest.spyOn(console, "log").mockImplementation(() => {});
@@ -1006,3 +1029,432 @@ describe("brainTreePaymentController", () => {
     });
   });
 });
+
+// Qinzhe Wang A0337880U
+describe("createProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("returns 500 when name is missing", async () => {
+    const req = {
+      fields: { description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Name is Required" });
+    expect(productModel).not.toHaveBeenCalled();
+  });
+
+  test("returns 500 when description is missing", async () => {
+    const req = {
+      fields: { name: "N", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Description is Required" });
+    expect(productModel).not.toHaveBeenCalled();
+  });
+  test("returns 500 when price is missing", async () => {
+    const req = {
+      fields: { name: "N", description: "d", category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Price is Required" });
+    expect(productModel).not.toHaveBeenCalled();
+  });
+  test("returns 500 when category is missing", async () => {
+    const req = {
+      fields: { name: "N", description: "d", price: 10, quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Category is Required" });
+    expect(productModel).not.toHaveBeenCalled();
+  });
+  test("returns 500 when quantity is missing", async () => {
+    const req = {
+      fields: { name: "N", description: "d", price: 10, category: "c", shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Quantity is Required" });
+    expect(productModel).not.toHaveBeenCalled();
+  });
+  test("returns 500 when photo size > 1mb", async () => {
+    const req = {
+      fields: { name: "N", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: { photo: { size: 1000001, path: "/tmp/a", type: "image/png" } },
+    };
+    const res = mockRes();
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Photo is required and should be less than 1MB",
+    });
+    expect(productModel).not.toHaveBeenCalled();
+    expect(fs.readFileSync).not.toHaveBeenCalled();
+  });
+
+  test("creates product without photo and returns 201", async () => {
+    const req = {
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    const saveMock = jest.fn().mockResolvedValueOnce(undefined);
+    const productInstance = {
+      photo: { data: null, contentType: null },
+      save: saveMock,
+    };
+
+    productModel.mockImplementationOnce(function (doc) {
+      this._doc = doc;
+      return productInstance;
+    });
+
+    await createProductController(req, res);
+
+    expect(slugify).toHaveBeenCalledWith("Phone");
+    expect(productModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Phone",
+          slug: "slug-Phone",
+        })
+    );
+
+    expect(saveMock).toHaveBeenCalledTimes(1);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Product Created Successfully",
+        })
+    );
+  });
+
+  test("creates product with photo and sets photo fields", async () => {
+    const req = {
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: { photo: { size: 999999, path: "/tmp/p.png", type: "image/png" } },
+    };
+    const res = mockRes();
+
+    fs.readFileSync.mockReturnValueOnce(Buffer.from("fake"));
+
+    const saveMock = jest.fn().mockResolvedValueOnce(undefined);
+    const productInstance = {
+      photo: { data: null, contentType: null },
+      save: saveMock,
+    };
+
+    productModel.mockImplementationOnce(function () {
+      return productInstance;
+    });
+
+    await createProductController(req, res);
+
+    expect(fs.readFileSync).toHaveBeenCalledWith("/tmp/p.png");
+    expect(productInstance.photo.data).toEqual(Buffer.from("fake"));
+    expect(productInstance.photo.contentType).toBe("image/png");
+
+    expect(saveMock).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  test("returns 500 when save throws", async () => {
+    const req = {
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    const saveMock = jest.fn().mockRejectedValueOnce(new Error("save failed"));
+    const productInstance = { photo: { data: null, contentType: null }, save: saveMock };
+
+    productModel.mockImplementationOnce(function () {
+      return productInstance;
+    });
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error in creating product",
+        })
+    );
+  });
+});
+// Qinzhe Wang A0337880U
+describe("deleteProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("deletes product and returns 200", async () => {
+    const req = { params: { pid: "p1" } };
+    const res = mockRes();
+
+    const query = {
+      select: jest.fn().mockResolvedValueOnce(null),
+    };
+
+    productModel.findByIdAndDelete.mockReturnValueOnce(query);
+
+    await deleteProductController(req, res);
+
+    expect(productModel.findByIdAndDelete).toHaveBeenCalledWith("p1");
+    expect(query.select).toHaveBeenCalledWith("-photo");
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Product Deleted successfully",
+        })
+    );
+  });
+
+  test("returns 500 when database throws error", async () => {
+    const req = { params: { pid: "p1" } };
+    const res = mockRes();
+
+    const query = {
+      select: jest.fn().mockRejectedValueOnce(new Error("DB error")),
+    };
+
+    productModel.findByIdAndDelete.mockReturnValueOnce(query);
+
+    await deleteProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error while deleting product",
+        })
+    );
+  });
+});
+
+// Qinzhe Wang A0337880U
+describe("updateProductController", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("returns 500 when name is missing", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Name is Required" });
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  test("returns 500 when description is missing", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "N",  price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Description is Required" });
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+  test("returns 500 when price is missing", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "N", description: "d",  category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Price is Required" });
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+  test("returns 500 when category is missing", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "N", description: "d", price: 10,  quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Category is Required" });
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+  test("returns 500 when quantity is missing", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "N", description: "d", price: 10, category: "c",  shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ error: "Quantity is Required" });
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  test("returns 500 when photo size > 1mb", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: { photo: { size: 1000001, path: "/tmp/a", type: "image/png" } },
+    };
+    const res = mockRes();
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Photo is required and should be less than 1MB",
+    });
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(fs.readFileSync).not.toHaveBeenCalled();
+  });
+
+  test("updates product without photo and returns 201", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    const saveMock = jest.fn().mockResolvedValueOnce(undefined);
+
+    // findByIdAndUpdate 返回的必须是“可被后续使用”的对象
+    const productDoc = {
+      _id: "p1",
+      name: "Phone",
+      photo: { data: null, contentType: null },
+      save: saveMock,
+    };
+
+    productModel.findByIdAndUpdate.mockResolvedValueOnce(productDoc);
+
+    await updateProductController(req, res);
+
+    expect(slugify).toHaveBeenCalledWith("Phone");
+
+    expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        "p1",
+        expect.objectContaining({
+          name: "Phone",
+          slug: "slug-Phone",
+        }),
+        { new: true }
+    );
+
+    expect(saveMock).toHaveBeenCalledTimes(1);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Product Updated Successfully",
+          products: productDoc,
+        })
+    );
+  });
+
+  test("updates product with photo, sets photo fields, and returns 201", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: { photo: { size: 999999, path: "/tmp/p.png", type: "image/png" } },
+    };
+    const res = mockRes();
+
+    fs.readFileSync.mockReturnValueOnce(Buffer.from("fake"));
+
+    const saveMock = jest.fn().mockResolvedValueOnce(undefined);
+
+    const productDoc = {
+      _id: "p1",
+      name: "Phone",
+      photo: { data: null, contentType: null },
+      save: saveMock,
+    };
+
+    productModel.findByIdAndUpdate.mockResolvedValueOnce(productDoc);
+
+    await updateProductController(req, res);
+
+    expect(fs.readFileSync).toHaveBeenCalledWith("/tmp/p.png");
+    expect(productDoc.photo.data).toEqual(Buffer.from("fake"));
+    expect(productDoc.photo.contentType).toBe("image/png");
+
+    expect(saveMock).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  test("returns 500 when database throws", async () => {
+    const req = {
+      params: { pid: "p1" },
+      fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
+      files: {},
+    };
+    const res = mockRes();
+
+    productModel.findByIdAndUpdate.mockRejectedValueOnce(new Error("DB down"));
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error in Updating product",
+        })
+    );
+  });
+});
+
