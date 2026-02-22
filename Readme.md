@@ -146,7 +146,7 @@ To begin unit testing with Jest in your project, follow these steps:
      ```
 
 
-## Project Contributions
+## 6. Project Contributions
 ## Milestone 1
 | Name | Client Related Files (/client/src/) | Server Related Files (./)
 | :---- | :---- | :----
@@ -155,3 +155,11 @@ To begin unit testing with Jest in your project, follow these steps:
 | SONG YICHAO | <ul><li>components/Routes/Private.js </li><li>components/UserMenu.js </li><li>pages/user/Dashboard.js</li><li>pages/user/Orders.js</li><li>pages/user/Profile.js</li><li>components/Form/SearchInput.js </li><li>pages/Search.js</li><li>context/search.js</li></ul> | <ul><li>models/userModel.js</li><li>models/orderModel.js</li><li>controllers/authController.js<ul><li>updateProfileController</li><li>getOrdersController</li><li>getAllOrdersController</li><li>orderStatusController</li></li><li>registerController</li><li>loginController</li><li>forgotPasswordController</li><li>testController</li></ul>
 | MANSOOR SYED ALI | <ul><li>pages/ProductDetails.js</li><li>pages/CategoryProduct.js</li><li>pages/Contact.js</li><li>pages/Policy.js</li><li>components/Footer.js</li><li>components/Header.js</li><li>components/Layout.js</li><li>components/Spinner.js</li><li>pages/About.js</li><li>pages/Pagenotfound.js</li></ul> | <ul><li>controllers/productController.js<ul><li>getProductController</li><li>getSingleProductController</li><li>productPhotoController</li><li>productFiltersController</li><li>productCountController</li><li>productListController</li><li>searchProductController</li><li>realtedProductController</li><li>productCategoryController</li></ul></li><li>models/productModel.js</li><li>config/db.js</li></ul>
 | Lim Jun Xian | <ul><li>pages/Homepage.js</li><li>context/cart.js</li><li>pages/CartPage.js</li><li>hooks/useCategory.js</li><li>pages/Categories.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>categoryController</li><li>singleCategoryController</li></ul><li>controllers/productController.js<ul><li>braintreeTokenController</li><li>brainTreePaymentController</li></ul><li>models/categoryModel.js</li>
+
+
+## 7. CI workflows
+
+### MS1 CI URL
+
+https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team22/actions/runs/22276067731/job/64438320117?pr=11 
+
