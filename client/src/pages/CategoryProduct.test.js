@@ -1,7 +1,7 @@
 // MANSOOR Syed Ali A0337939J
 
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../context/cart";
@@ -47,12 +47,12 @@ describe("CategoryProduct", () => {
       category: { _id: "c1", name: "Cat1" },
     };
     axios.get.mockResolvedValueOnce({ data });
-    render(<CategoryProduct />);
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        "/api/v1/product/product-category/cat-slug",
-      );
+    await act(async () => {
+      render(<CategoryProduct />);
     });
+    expect(axios.get).toHaveBeenCalledWith(
+      "/api/v1/product/product-category/cat-slug",
+    );
     const cat1 = await screen.findByText(/Category - Cat1/);
     const prod1 = await screen.findByText(/Prod1/);
     expect(cat1).toBeInTheDocument();
@@ -62,21 +62,25 @@ describe("CategoryProduct", () => {
   it("handles no products", async () => {
     const data = { products: [], category: { _id: "c1", name: "Cat1" } };
     axios.get.mockResolvedValueOnce({ data });
-    render(<CategoryProduct />);
-    await waitFor(() => {
-      expect(screen.getByText(/0 result found/)).toBeInTheDocument();
+    await act(async () => {
+      render(<CategoryProduct />);
     });
+    expect(screen.getByText(/0 result found/)).toBeInTheDocument();
   });
 
   it("handles API errors gracefully", async () => {
     axios.get.mockRejectedValueOnce(new Error("API error"));
-    render(<CategoryProduct />);
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        "/api/v1/product/product-category/cat-slug",
-      );
+    jest.spyOn(console, "log").mockImplementation(() => {});
+
+    await act(async () => {
+      render(<CategoryProduct />);
     });
+    expect(axios.get).toHaveBeenCalledWith(
+      "/api/v1/product/product-category/cat-slug",
+    );
     // Should not throw, just log error
+    // Suppress log output in test
+    expect(console.log).toHaveBeenCalledWith(expect.any(Error));
   });
 
   it("adds product to cart and shows toast", async () => {
@@ -91,7 +95,9 @@ describe("CategoryProduct", () => {
     };
     const data = { products: [prod], category: { _id: "c1", name: "Cat1" } };
     axios.get.mockResolvedValueOnce({ data });
-    render(<CategoryProduct />);
+    await act(async () => {
+      render(<CategoryProduct />);
+    });
     await waitFor(() => screen.getByText(/Prod1/));
     const addBtn = screen.getByText(/ADD TO CART/);
     addBtn.click();
@@ -109,7 +115,9 @@ describe("CategoryProduct", () => {
     };
     const data = { products: [prod], category: { _id: "c1", name: "Cat1" } };
     axios.get.mockResolvedValueOnce({ data });
-    render(<CategoryProduct />);
+    await act(async () => {
+      render(<CategoryProduct />);
+    });
     await waitFor(() => screen.getByText(/Prod1/));
     const moreDetailsBtn = screen.getByText(/More Details/);
     moreDetailsBtn.click();
@@ -118,9 +126,9 @@ describe("CategoryProduct", () => {
 
   it("doesn't fetch products when slug is missing", async () => {
     useParams.mockReturnValue({});
-    render(<CategoryProduct />);
-    await waitFor(() => {
-      expect(axios.get).not.toHaveBeenCalled();
+    await act(async () => {
+      render(<CategoryProduct />);
     });
+    expect(axios.get).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,7 @@
 // MANSOOR Syed Ali A0337939J
 
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -61,16 +61,14 @@ describe("ProductDetails", () => {
       .mockResolvedValueOnce({ data: productData })
       .mockResolvedValueOnce({ data: relatedData });
 
-    render(<ProductDetails />);
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        "/api/v1/product/get-product/test-slug",
-      );
-      expect(axios.get).toHaveBeenCalledWith(
-        "/api/v1/product/related-product/p1/c1",
-      );
+    await act(async () => {
+      render(<ProductDetails />);
     });
+
+    expect(axios.get).toHaveBeenCalledWith(
+      "/api/v1/product/get-product/test-slug");
+    expect(axios.get).toHaveBeenCalledWith(
+      "/api/v1/product/related-product/p1/c1");
 
     expect(screen.getByText(/Test Product/)).toBeInTheDocument();
     expect(screen.getByText(/RelProd/)).toBeInTheDocument();
@@ -91,23 +89,25 @@ describe("ProductDetails", () => {
       .mockResolvedValueOnce({ data: productData })
       .mockResolvedValueOnce({ data: { products: [] } });
 
-    render(<ProductDetails />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/No Similar Products found/)).toBeInTheDocument();
+    await act(async () => {
+      render(<ProductDetails />);
     });
+
+    expect(screen.getByText(/No Similar Products found/)).toBeInTheDocument();
   });
 
   it("handles API errors gracefully", async () => {
     axios.get.mockRejectedValueOnce(new Error("API error"));
+    jest.spyOn(console, "log").mockImplementation(() => { });
 
-    render(<ProductDetails />);
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith(
-        "/api/v1/product/get-product/test-slug",
-      );
+    await act(async () => {
+      render(<ProductDetails />);
     });
+
+    expect(axios.get).toHaveBeenCalledWith(
+      "/api/v1/product/get-product/test-slug");
+    expect(console.log).toHaveBeenCalledWith(
+      new Error("API error"));
   });
 
   it("adds related product to cart and shows toast", async () => {
@@ -137,12 +137,15 @@ describe("ProductDetails", () => {
       .mockResolvedValueOnce({ data: productData })
       .mockResolvedValueOnce({ data: { products: [relatedProduct] } });
 
-    render(<ProductDetails />);
-
-    await waitFor(() => screen.getByText(/RelProd/));
+    await act(async () => {
+      render(<ProductDetails />);
+    });
+    screen.getByText(/RelProd/);
 
     const addBtn = screen.getAllByText(/ADD TO CART/)[1];
-    addBtn.click();
+    await act(async () => {
+      addBtn.click();
+    });
 
     expect(setCart).toHaveBeenCalledWith([{ _id: "cart1" }, relatedProduct]);
     expect(toast.success).toHaveBeenCalledWith("Item Added to cart");
@@ -172,26 +175,32 @@ describe("ProductDetails", () => {
       .mockResolvedValueOnce({ data: productData })
       .mockResolvedValueOnce({ data: { products: [relatedProduct] } });
 
-    render(<ProductDetails />);
+    await act(async () => {
+      render(<ProductDetails />);
+    });
 
-    await waitFor(() => screen.getByText(/RelProd/));
+    screen.getByText(/RelProd/);
 
     const moreDetailsBtn = screen.getByText(/More Details/);
-    moreDetailsBtn.click();
+    await act(async () => {
+      moreDetailsBtn.click();
+    });
 
     expect(mockNavigate).toHaveBeenCalledWith("/product/relprod");
   });
 
   it("doesn't fetch product when slug is missing", async () => {
     useParams.mockReturnValue({});
-    render(<ProductDetails />);
-    await waitFor(() => {
-      expect(axios.get).not.toHaveBeenCalled();
+
+    await act(async () => {
+      render(<ProductDetails />);
     });
+
+    expect(axios.get).not.toHaveBeenCalled();
   });
 
   it("logs error when fetching similar products fails", async () => {
-    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => { });
 
     const productData = {
       product: {
@@ -207,12 +216,10 @@ describe("ProductDetails", () => {
       .mockResolvedValueOnce({ data: productData })
       .mockRejectedValueOnce(new Error("API error"));
 
-    render(<ProductDetails />);
-
-    await waitFor(() => {
-      expect(logSpy).toHaveBeenCalledWith(new Error("API error"));
+    await act(async () => {
+      render(<ProductDetails />);
     });
 
-    logSpy.mockRestore();
+    expect(console.log).toHaveBeenCalledWith(new Error("API error"));
   });
 });
