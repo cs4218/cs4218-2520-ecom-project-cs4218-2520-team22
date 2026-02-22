@@ -80,7 +80,7 @@ const Register = () => {
           </div>
           <div className="mb-3">
             <input
-              type="text" // avoid user facing unexpected input validation error
+              type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="form-control"

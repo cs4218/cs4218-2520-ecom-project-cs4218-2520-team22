@@ -53,6 +53,7 @@ describe("Register Component", () => {
     expect(getByPlaceholderText('Enter Your Password')).toBeInTheDocument();
     expect(getByPlaceholderText('Enter Your Password')).toHaveAttribute('type', 'password');
     expect(getByPlaceholderText('Enter Your Phone')).toBeInTheDocument();
+    expect(getByPlaceholderText('Enter Your Phone')).toHaveAttribute('type', 'tel');
     expect(getByPlaceholderText('Enter Your Address')).toBeInTheDocument();
     expect(getByPlaceholderText('Enter Your DOB')).toBeInTheDocument();
     expect(getByPlaceholderText('Enter Your DOB')).toHaveAttribute('type', 'date');
