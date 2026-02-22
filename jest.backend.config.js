@@ -10,9 +10,12 @@ export default {
     // Original
     //"<rootDir>/controllers/*.test.js",
 
-    // Song Yichao, A0255686M
-    "<rootDir>/controllers/authController.test.js",
+    "<rootDir>/controllers/*.test.js",
     "<rootDir>/models/*.test.js",
+    "<rootDir>/helpers/*.test.js",
+    "<rootDir>/config/*.test.js",
+    "<rootDir>/routes/*.test.js",
+    "<rootDir>/middlewares/*.test.js",
   ],
 
   // jest code coverage
@@ -21,10 +24,17 @@ export default {
     // Original
     // "controllers/**",
 
-    // Song Yichao, A0255686M
-    "controllers/authController.js",
-    "models/userModel.js",
-    "models/orderModel.js",
+    "**/*.js",
+    "!node_modules/**",
+    "!coverage/**",
+    "!playwright-report/**",
+    "!client/**",
+    "!**/*.config.js",
+
+    "!**/*.test.js",
+    "!**/*.test.jsx",
+    "!**/__tests__/**",
+    "!**/tests/**",
   ],
   coverageThreshold: {
     global: {

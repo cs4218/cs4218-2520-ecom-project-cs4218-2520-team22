@@ -13,24 +13,19 @@ export default {
 
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
-    "\\.(css|scss)$": "identity-obj-proxy",
+    "\\.(css|less|sass|scss)$": "identity-obj-proxy",
   },
 
-  // ignore all node_modules except styleMock (needed for css imports)
-  transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
+  // // ignore all node_modules except styleMock (needed for css imports)
+  // transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
   testMatch: [
     // Original
     // "<rootDir>/client/src/pages/Auth/*.test.js",
 
-    // Song Yichao, A0255686M
-    "<rootDir>/client/src/components/Routes/*.test.js",
-    "<rootDir>/client/src/components/Form/*.test.js",
-    "<rootDir>/client/src/components/*.test.js",
-    "<rootDir>/client/src/context/*.test.js",
-    "<rootDir>/client/src/pages/user/*.test.js",
-    "<rootDir>/client/src/pages/*.test.js",
+    "<rootDir>/client/src/**/*.test.js",
+    "<rootDir>/client/src/**/*.test.jsx",
   ],
 
   // jest code coverage
@@ -39,15 +34,9 @@ export default {
     // Original
     // "client/src/pages/Auth/**",
 
-    // Song Yichao, A0255686M
-    "client/src/components/Routes/Private.js",
-    "client/src/components/UserMenu.js",
-    "client/src/pages/user/Dashboard.js",
-    "client/src/pages/user/Orders.js",
-    "client/src/pages/user/Profile.js",
-    "client/src/components/Form/SearchInput.js",
-    "client/src/context/search.js",
-    "client/src/pages/Search.js",
+    "client/src/**/*.{js,jsx}",
+    "!client/src/_site/**",
+    "!client/src/**/*.test.{js,jsx}",
   ],
   coverageThreshold: {
     global: {
