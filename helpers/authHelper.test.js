@@ -2,11 +2,10 @@ import bcrypt from "bcrypt";
 import { hashPassword, comparePassword } from "./authHelper";
 import { before } from "node:test";
 
-jest.mock('bcrypt');
-
 describe("authHelper Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mock('bcrypt')
   });
 
   describe("hashPassword Function", () => {
@@ -26,7 +25,7 @@ describe("authHelper Component", () => {
   });
 
   describe("Integration Testing", () => {
-    beforeAll(() => {
+    beforeEach(() => {
       jest.unmock('bcrypt');
     });
     
