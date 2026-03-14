@@ -19,6 +19,7 @@ logs/
 
 # Coverage
 coverage/
+.scannerwork/
 
 # Playwright
 playwright-report/
