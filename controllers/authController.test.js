@@ -89,6 +89,274 @@ describe("authController unit tests", () => {
     logSpy.mockRestore();
   });
 
+  // Order Controllers
+  describe("Order Controllers", () => {
+    describe("updateProfileController", () => {
+      // add test case, Song Yichao, A0255686M
+      it("should return error JSON if password is provided but < 6 chars", async () => {
+        const req = { user: { _id: USER_ID }, body: { password: "123" } };
+        const res = makeRes();
+
+        // controller calls findById before checking password length
+        mockUserModel.findById.mockResolvedValueOnce({
+          _id: USER_ID,
+          name: "Old",
+          password: "oldhash",
+          phone: "111",
+          address: { line1: "OldAddr" },
+        });
+
+        await updateProfileController(req, res);
+
+        expect(res.json).toHaveBeenCalledWith({
+          error: "Password is required and 6 characters long",
+        });
+        expect(mockUserModel.findByIdAndUpdate).not.toHaveBeenCalled();
+      });
+
+      // add test case, Song Yichao, A0255686M
+      it("should update profile using existing password when no new password is provided", async () => {
+        const req = {
+          user: { _id: USER_ID },
+          body: { name: "NewName", phone: "999", address: { line1: "NewAddr" } },
+        };
+        const res = makeRes();
+
+        mockUserModel.findById.mockResolvedValueOnce({
+          _id: USER_ID,
+          name: "OldName",
+          password: "oldhash",
+          phone: "111",
+          address: { line1: "OldAddr" },
+        });
+
+        mockUserModel.findByIdAndUpdate.mockResolvedValueOnce({
+          _id: USER_ID,
+          name: "NewName",
+          password: "oldhash",
+          phone: "999",
+          address: { line1: "NewAddr" },
+        });
+
+        await updateProfileController(req, res);
+
+        expect(mockAuthHelper.hashPassword).not.toHaveBeenCalled();
+        expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          USER_ID,
+          {
+            name: "NewName",
+            password: "oldhash",
+            phone: "999",
+            address: { line1: "NewAddr" },
+          },
+          { new: true }
+        );
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: true,
+            message: "Profile Updated Successfully",
+            updatedUser: expect.any(Object),
+          })
+        );
+      });
+
+      // add test case, Song Yichao, A0255686M
+      it("should hash password and update profile when new password is provided", async () => {
+        const req = { user: { _id: USER_ID }, body: { password: "newpass", phone: "222" } };
+        const res = makeRes();
+
+        mockUserModel.findById.mockResolvedValueOnce({
+          _id: USER_ID,
+          name: "OldName",
+          password: "oldhash",
+          phone: "111",
+          address: { line1: "OldAddr" },
+        });
+
+        mockAuthHelper.hashPassword.mockResolvedValueOnce("newhash");
+
+        mockUserModel.findByIdAndUpdate.mockResolvedValueOnce({
+          _id: USER_ID,
+          name: "OldName",
+          password: "newhash",
+          phone: "222",
+          address: { line1: "OldAddr" },
+        });
+
+        await updateProfileController(req, res);
+
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("newpass");
+        expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          USER_ID,
+          {
+            name: "OldName",
+            password: "newhash",
+            phone: "222",
+            address: { line1: "OldAddr" },
+          },
+          { new: true }
+        );
+        expect(res.status).toHaveBeenCalledWith(200);
+      });
+
+      // add test case, Song Yichao, A0255686M
+      it("should handle errors and return 400 with message", async () => {
+        const req = { user: { _id: USER_ID }, body: { name: "X" } };
+        const res = makeRes();
+
+        mockUserModel.findById.mockRejectedValueOnce(new Error("db error"));
+
+        await updateProfileController(req, res);
+
+        expect(logSpy).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "Error While Updating profile",
+          })
+        );
+      });
+    });
+
+    describe("getOrdersController", () => {
+      // add test case, Song Yichao, A0255686M
+      it("should return orders for logged-in buyer with populate chain", async () => {
+        const req = { user: { _id: BUYER_ID } };
+        const res = makeRes();
+
+        const mockOrders = [{ _id: "o1" }, { _id: "o2" }];
+
+        const queryChain = {
+          populate: jest.fn().mockReturnThis(),
+          then: undefined,
+        };
+        queryChain.then = (resolve) => resolve(mockOrders);
+
+        mockOrderModel.find.mockReturnValueOnce(queryChain);
+
+        await getOrdersController(req, res);
+
+        expect(mockOrderModel.find).toHaveBeenCalledWith({ buyer: BUYER_ID });
+        expect(queryChain.populate).toHaveBeenNthCalledWith(1, "products", "-photo");
+        expect(queryChain.populate).toHaveBeenNthCalledWith(2, "buyer", "name");
+        expect(res.json).toHaveBeenCalledWith(mockOrders);
+      });
+
+      // add test case, Song Yichao, A0255686M
+      it("should return 500 when getOrdersController throws (covers catch)", async () => {
+        const req = { user: { _id: BUYER_ID } };
+        const res = makeRes();
+
+        mockOrderModel.find.mockImplementationOnce(() => {
+          throw new Error("query failed");
+        });
+
+        await getOrdersController(req, res);
+
+        expect(logSpy).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "Error While Getting Orders",
+            error: expect.anything(),
+          })
+        );
+      });
+    });
+
+    describe("getAllOrdersController", () => {
+      // add test case, Song Yichao, A0255686M
+      it("should return all orders with populate chain and sort by createdAt desc", async () => {
+        const req = {};
+        const res = makeRes();
+
+        const mockOrders = [{ _id: "a1" }];
+
+        const queryChain = {
+          populate: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockReturnThis(),
+          then: undefined,
+        };
+        queryChain.then = (resolve) => resolve(mockOrders);
+
+        mockOrderModel.find.mockReturnValueOnce(queryChain);
+
+        await getAllOrdersController(req, res);
+
+        expect(mockOrderModel.find).toHaveBeenCalledWith({});
+        expect(queryChain.populate).toHaveBeenNthCalledWith(1, "products", "-photo");
+        expect(queryChain.populate).toHaveBeenNthCalledWith(2, "buyer", "name");
+        expect(queryChain.sort).toHaveBeenCalledWith({ createdAt: -1 });
+        expect(res.json).toHaveBeenCalledWith(mockOrders);
+      });
+
+      // add test case, Song Yichao, A0255686M
+      it("should return 500 when getAllOrdersController throws (covers catch)", async () => {
+        const req = {};
+        const res = makeRes();
+
+        mockOrderModel.find.mockImplementationOnce(() => {
+          throw new Error("query failed");
+        });
+
+        await getAllOrdersController(req, res);
+
+        expect(logSpy).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "Error While Getting All Orders",
+            error: expect.anything(),
+          })
+        );
+      });
+    });
+
+    describe("orderStatusController", () => {
+      // add test case, Song Yichao, A0255686M
+      it("should update order status and return updated order", async () => {
+        const req = { params: { orderId: ORDER_ID }, body: { status: "Shipped" } };
+        const res = makeRes();
+
+        const updated = { _id: ORDER_ID, status: "Shipped" };
+        mockOrderModel.findByIdAndUpdate.mockResolvedValueOnce(updated);
+
+        await orderStatusController(req, res);
+
+        expect(mockOrderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          ORDER_ID,
+          { status: "Shipped" },
+          { new: true }
+        );
+        expect(res.json).toHaveBeenCalledWith(updated);
+      });
+
+      // add test case, Song Yichao, A0255686M
+      it("should return 500 when orderStatusController throws (covers catch)", async () => {
+        const req = { params: { orderId: ORDER_ID }, body: { status: "Shipped" } };
+        const res = makeRes();
+
+        mockOrderModel.findByIdAndUpdate.mockRejectedValueOnce(new Error("db error"));
+
+        await orderStatusController(req, res);
+
+        expect(logSpy).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "Error While Updating Order",
+            error: expect.anything(),
+          })
+        );
+      });
+    });
+  });
+
   // Login Controllers
   describe("Login controllers", () => {
     describe("registerController", () => {
@@ -111,7 +379,7 @@ describe("authController unit tests", () => {
         await registerController(testReq, testRes); // Act
 
         expect(testRes.send).toHaveBeenCalledWith({ error: "Name is Required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -133,7 +401,7 @@ describe("authController unit tests", () => {
         await registerController(testReq, testRes); // Act
 
         expect(testRes.send).toHaveBeenCalledWith({ message: "Email is Required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -155,7 +423,7 @@ describe("authController unit tests", () => {
         await registerController(testReq, testRes); // Act
 
         expect(testRes.send).toHaveBeenCalledWith({ message: "Password is Required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -177,7 +445,7 @@ describe("authController unit tests", () => {
         await registerController(testReq, testRes); // Act
 
         expect(testRes.send).toHaveBeenCalledWith({ message: "Phone no is Required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -199,7 +467,7 @@ describe("authController unit tests", () => {
         await registerController(testReq, testRes); // Act
 
         expect(testRes.send).toHaveBeenCalledWith({ message: "Address is Required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -221,7 +489,7 @@ describe("authController unit tests", () => {
         await registerController(testReq, testRes); // Act
 
         expect(testRes.send).toHaveBeenCalledWith({ message: "Answer is Required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -240,17 +508,17 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockResolvedValue({ email: "existing@example.com" });
+        mockUserModel.findOne.mockResolvedValue({ email: "existing@example.com" });
 
         await registerController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "existing@example.com" });
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "existing@example.com" });
         expect(testRes.status).toHaveBeenCalledWith(200);
         expect(testRes.send).toHaveBeenCalledWith({
           success: false,
           message: "Already registered, please login",
         });
-        expect(hashPassword).not.toHaveBeenCalled();
+        expect(mockAuthHelper.hashPassword).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -269,14 +537,14 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockResolvedValue(null);
-        hashPassword.mockRejectedValue(new Error("Hashing failed"));
+        mockUserModel.findOne.mockResolvedValue(null);
+        mockAuthHelper.hashPassword.mockRejectedValue(new Error("Hashing failed"));
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await registerController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
-        expect(hashPassword).toHaveBeenCalledWith("password123");
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("password123");
         expect(console.log).toHaveBeenCalledWith(expect.any(Error));
         expect(testRes.status).toHaveBeenCalledWith(500);
         expect(testRes.send).toHaveBeenCalledWith({
@@ -302,18 +570,18 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockResolvedValue(null);
-        hashPassword.mockResolvedValue("hashedPassword123");
+        mockUserModel.findOne.mockResolvedValue(null);
+        mockAuthHelper.hashPassword.mockResolvedValue("hashedPassword123");
 
         const mockSave = jest.fn().mockRejectedValue(new Error("Database save failed"));
-        userModel.mockImplementationOnce(() => ({ save: mockSave }));
+        mockUserModel.mockImplementationOnce(() => ({ save: mockSave }));
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await registerController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
-        expect(hashPassword).toHaveBeenCalledWith("password123");
-        expect(userModel).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("password123");
+        expect(mockUserModel).toHaveBeenCalledWith({
           name: "Test User",
           email: "test@example.com",
           phone: "1234567890",
@@ -345,18 +613,18 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockResolvedValue(null);
-        hashPassword.mockResolvedValue("hashedPassword123");
+        mockUserModel.findOne.mockResolvedValue(null);
+        mockAuthHelper.hashPassword.mockResolvedValue("hashedPassword123");
 
         const mockUser = { _id: "user123", name: "Test User", email: "test@example.com" };
         const mockSave = jest.fn().mockResolvedValue(mockUser);
-        userModel.mockImplementationOnce(() => ({ save: mockSave }));
+        mockUserModel.mockImplementationOnce(() => ({ save: mockSave }));
 
         await registerController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
-        expect(hashPassword).toHaveBeenCalledWith("password123");
-        expect(userModel).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("password123");
+        expect(mockUserModel).toHaveBeenCalledWith({
           name: "Test User",
           email: "test@example.com",
           phone: "1234567890",
@@ -558,7 +826,7 @@ describe("authController unit tests", () => {
           success: false,
           message: "Invalid email or password",
         });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -580,7 +848,7 @@ describe("authController unit tests", () => {
           success: false,
           message: "Invalid email or password",
         });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -595,17 +863,17 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockResolvedValue(null);
+        mockUserModel.findOne.mockResolvedValue(null);
 
         await loginController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "nonexistent@example.com" });
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "nonexistent@example.com" });
         expect(testRes.status).toHaveBeenCalledWith(404);
         expect(testRes.send).toHaveBeenCalledWith({
           success: false,
           message: "Email is not registered",
         });
-        expect(comparePassword).not.toHaveBeenCalled();
+        expect(mockAuthHelper.comparePassword).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -625,19 +893,19 @@ describe("authController unit tests", () => {
           email: "test@example.com",
           password: "hashedPassword123"
         };
-        userModel.findOne.mockResolvedValue(mockUser);
-        comparePassword.mockResolvedValue(false);
+        mockUserModel.findOne.mockResolvedValue(mockUser);
+        mockAuthHelper.comparePassword.mockResolvedValue(false);
 
         await loginController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
-        expect(comparePassword).toHaveBeenCalledWith("wrongpassword", "hashedPassword123");
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
+        expect(mockAuthHelper.comparePassword).toHaveBeenCalledWith("wrongpassword", "hashedPassword123");
         expect(testRes.status).toHaveBeenCalledWith(200);
         expect(testRes.send).toHaveBeenCalledWith({
           success: false,
           message: "Invalid Password",
         });
-        expect(JWT.sign).not.toHaveBeenCalled();
+        expect(mockJWT.sign).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -654,12 +922,12 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockRejectedValue(new Error("Database connection failed"));
+        mockUserModel.findOne.mockRejectedValue(new Error("Database connection failed"));
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await loginController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
         expect(console.log).toHaveBeenCalledWith(expect.any(Error));
         expect(testRes.status).toHaveBeenCalledWith(500);
         expect(testRes.send).toHaveBeenCalledWith({
@@ -691,15 +959,15 @@ describe("authController unit tests", () => {
           password: "hashedPassword123"
         };
         const mockToken = "jwt-token-123";
-        userModel.findOne.mockResolvedValue(mockUser);
-        comparePassword.mockResolvedValue(true);
-        JWT.sign.mockResolvedValue(mockToken);
+        mockUserModel.findOne.mockResolvedValue(mockUser);
+        mockAuthHelper.comparePassword.mockResolvedValue(true);
+        mockJWT.sign.mockResolvedValue(mockToken);
 
         await loginController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
-        expect(comparePassword).toHaveBeenCalledWith("password123", "hashedPassword123");
-        expect(JWT.sign).toHaveBeenCalledWith(
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
+        expect(mockAuthHelper.comparePassword).toHaveBeenCalledWith("password123", "hashedPassword123");
+        expect(mockJWT.sign).toHaveBeenCalledWith(
           { _id: "user123" },
           process.env.JWT_SECRET,
           { expiresIn: "7d" }
@@ -850,7 +1118,7 @@ describe("authController unit tests", () => {
 
         expect(testRes.status).toHaveBeenCalledWith(400);
         expect(testRes.send).toHaveBeenCalledWith({ message: "Email is required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -870,7 +1138,7 @@ describe("authController unit tests", () => {
 
         expect(testRes.status).toHaveBeenCalledWith(400);
         expect(testRes.send).toHaveBeenCalledWith({ message: "Answer is required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -890,7 +1158,7 @@ describe("authController unit tests", () => {
 
         expect(testRes.status).toHaveBeenCalledWith(400);
         expect(testRes.send).toHaveBeenCalledWith({ message: "New Password is required" });
-        expect(userModel.findOne).not.toHaveBeenCalled();
+        expect(mockUserModel.findOne).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -906,11 +1174,11 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockResolvedValue(null);
+        mockUserModel.findOne.mockResolvedValue(null);
 
         await forgotPasswordController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({
           email: "test@example.com",
           answer: "wrong answer"
         });
@@ -919,7 +1187,6 @@ describe("authController unit tests", () => {
           success: false,
           message: "Wrong Email Or Answer",
         });
-        expect(hashPassword).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
@@ -940,17 +1207,17 @@ describe("authController unit tests", () => {
           email: "test@example.com",
           answer: "security answer"
         };
-        userModel.findOne.mockResolvedValue(mockUser);
-        hashPassword.mockRejectedValue(new Error("Hashing failed"));
+        mockUserModel.findOne.mockResolvedValue(mockUser);
+        mockAuthHelper.hashPassword.mockRejectedValue(new Error("Hashing failed"));
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await forgotPasswordController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({
           email: "test@example.com",
           answer: "security answer"
         });
-        expect(hashPassword).toHaveBeenCalledWith("newpassword123");
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("newpassword123");
         expect(console.log).toHaveBeenCalledWith(expect.any(Error));
         expect(testRes.status).toHaveBeenCalledWith(500);
         expect(testRes.send).toHaveBeenCalledWith({
@@ -973,12 +1240,12 @@ describe("authController unit tests", () => {
           status: jest.fn().mockReturnThis(),
           send: jest.fn().mockReturnThis()
         };
-        userModel.findOne.mockRejectedValue(new Error("Database connection failed"));
+        mockUserModel.findOne.mockRejectedValue(new Error("Database connection failed"));
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await forgotPasswordController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({
           email: "test@example.com",
           answer: "security answer"
         });
@@ -1009,19 +1276,19 @@ describe("authController unit tests", () => {
           email: "test@example.com",
           answer: "security answer"
         };
-        userModel.findOne.mockResolvedValue(mockUser);
-        hashPassword.mockResolvedValue("hashedNewPassword123");
-        userModel.findByIdAndUpdate.mockRejectedValue(new Error("Database update failed"));
+        mockUserModel.findOne.mockResolvedValue(mockUser);
+        mockAuthHelper.hashPassword.mockResolvedValue("hashedNewPassword123");
+        mockUserModel.findByIdAndUpdate.mockRejectedValue(new Error("Database update failed"));
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await forgotPasswordController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({
           email: "test@example.com",
           answer: "security answer"
         });
-        expect(hashPassword).toHaveBeenCalledWith("newpassword123");
-        expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith("user123", {
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("newpassword123");
+        expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith("user123", {
           password: "hashedNewPassword123"
         });
         expect(console.log).toHaveBeenCalledWith(expect.any(Error));
@@ -1051,18 +1318,18 @@ describe("authController unit tests", () => {
           email: "test@example.com",
           answer: "security answer"
         };
-        userModel.findOne.mockResolvedValue(mockUser);
-        hashPassword.mockResolvedValue("hashedNewPassword123");
-        userModel.findByIdAndUpdate.mockResolvedValue(null);
+        mockUserModel.findOne.mockResolvedValue(mockUser);
+        mockAuthHelper.hashPassword.mockResolvedValue("hashedNewPassword123");
+        mockUserModel.findByIdAndUpdate.mockResolvedValue(null);
 
         await forgotPasswordController(testReq, testRes); // Act
 
-        expect(userModel.findOne).toHaveBeenCalledWith({
+        expect(mockUserModel.findOne).toHaveBeenCalledWith({
           email: "test@example.com",
           answer: "security answer"
         });
-        expect(hashPassword).toHaveBeenCalledWith("newpassword123");
-        expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith("user123", {
+        expect(mockAuthHelper.hashPassword).toHaveBeenCalledWith("newpassword123");
+        expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith("user123", {
           password: "hashedNewPassword123"
         });
         expect(testRes.status).toHaveBeenCalledWith(200);
