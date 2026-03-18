@@ -9,9 +9,10 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
 import * as productController from "../../../controllers/productController";
 import ProductDetails from "../../src/pages/ProductDetails";
+
+const mockNavigate = jest.fn();
 
 jest.mock(
   "axios",
@@ -21,7 +22,6 @@ jest.mock(
       get: jest.fn(),
     },
   }),
-  { virtual: true },
 );
 
 jest.mock("../../../controllers/productController", () => ({
@@ -32,8 +32,8 @@ jest.mock("../../../controllers/productController", () => ({
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
-  useParams: jest.fn(),
-  useNavigate: jest.fn(),
+  useParams: () => ({ slug: "galaxy-s24" }),
+  useNavigate: () => mockNavigate,
 }));
 
 jest.mock("../../src/components/Layout", () => ({ children }) => (
@@ -47,8 +47,6 @@ jest.mock("../../src/context/cart", () => ({
 describe("display related product info flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useParams.mockReturnValue({ slug: "galaxy-s24" });
-    useNavigate.mockReturnValue(jest.fn());
   });
 
   it("requests related products, invokes controller with pid/cid, and renders related product details", async () => {

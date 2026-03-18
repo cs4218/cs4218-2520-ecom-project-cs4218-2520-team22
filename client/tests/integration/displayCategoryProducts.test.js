@@ -22,7 +22,6 @@ jest.mock(
       get: jest.fn(),
     },
   }),
-  { virtual: true },
 );
 
 jest.mock("../../../controllers/productController", () => ({
