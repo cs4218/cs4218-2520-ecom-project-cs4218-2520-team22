@@ -9,7 +9,7 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import axios from "axios";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import * as productController from "../../../controllers/productController";
 import ProductDetails from "../../src/pages/ProductDetails";
 
@@ -29,6 +29,12 @@ jest.mock("../../../controllers/productController", () => ({
   getSingleProductController: jest.fn(),
 }));
 
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useParams: jest.fn(),
+  useNavigate: jest.fn(),
+}));
+
 jest.mock("../../src/components/Layout", () => ({ children }) => (
   <div>{children}</div>
 ));
@@ -40,6 +46,8 @@ jest.mock("../../src/context/cart", () => ({
 describe("display product info flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useParams.mockReturnValue({ slug: "galaxy-s24" });
+    useNavigate.mockReturnValue(jest.fn());
   });
 
   it("requests product by slug, invokes controller with slug, and renders returned details", async () => {
@@ -92,13 +100,7 @@ describe("display product info flow", () => {
       throw new Error(`Unexpected URL: ${url}`);
     });
 
-    render(
-      <MemoryRouter initialEntries={[`/product/${slug}`]}>
-        <Routes>
-          <Route path="/product/:slug" element={<ProductDetails />} />
-        </Routes>
-      </MemoryRouter>,
-    );
+    render(<ProductDetails />);
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith(
