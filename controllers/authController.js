@@ -223,7 +223,7 @@ export const getAllOrdersController = async (req, res) => {
       .find({})
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: "-1" });
+      .sort({ createdAt: -1 }); // Bug fix: was "-1" (string) which is invalid; must be -1 (number)
     res.json(orders);
   } catch (error) {
     console.log(error);
@@ -243,7 +243,7 @@ export const orderStatusController = async (req, res) => {
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
-      { new: true }
+      { new: true, runValidators: true }
     );
     res.json(orders);
   } catch (error) {
