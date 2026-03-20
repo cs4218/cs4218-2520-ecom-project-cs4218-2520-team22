@@ -107,6 +107,34 @@ describe("User Model Unit Tests", () => {
     expect(user.role).toBe(0);
   });
 
+  // added test case, Daniel Lai, A0192327A
+  it("should allow role to be set to 1", () => {
+    const user = new userModel({
+      name: "Test",
+      email: "test@test.com",
+      password: "123456",
+      phone: "12345678",
+      address: "Singapore",
+      answer: "blue",
+      role: 1
+    });
+
+    expect(user.role).toBe(1);
+  });
+
+  it("should trim name field", () => {
+    const user = new userModel({
+      name: "    Test    ",
+      email: "test@test.com",
+      password: "123456",
+      phone: "12345678",
+      address: "Singapore",
+      answer: "blue",
+    });
+
+    expect(user.name).toBe("Test");
+  });
+
   // add test case, Song Yichao, A0255686M
   it("should mark email as unique in schema", () => {
     const emailPath = userModel.schema.path("email");
