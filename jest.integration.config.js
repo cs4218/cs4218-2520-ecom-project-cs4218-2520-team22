@@ -6,7 +6,8 @@ export default {
   collectCoverage: false,
   // Longer timeout for DB spin-up
   testTimeout: 30000,
-  // Run test files serially to avoid concurrent MongoMemoryServer instances
-  // competing over process.env.MONGO_URL / mongoose singleton
-  maxWorkers: 1,
+  // Run in the main process (not workers) to avoid concurrent MongoMemoryServer
+  // instances competing over process.env.MONGO_URL / mongoose singleton
+  runner: "jest-runner",
+  runInBand: true,
 };
