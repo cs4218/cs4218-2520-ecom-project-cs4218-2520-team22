@@ -17,6 +17,7 @@ describe("AdminRoute", () => {
     jest.clearAllMocks();
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it("shows spinner when user is not authenticated", async () => {
     useAuth.mockReturnValue([{ token: "" }, jest.fn()]);
 
@@ -39,6 +40,7 @@ describe("AdminRoute", () => {
     });
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it("shows spinner if user is logged in but not admin", async () => {
     useAuth.mockReturnValue([{ token: "valid-token" }, jest.fn()]);
     axios.get.mockResolvedValue({ data: { ok: false } });
@@ -62,6 +64,7 @@ describe("AdminRoute", () => {
     });
   });
 
+  // added the test case, Daniel Lai, A0192327As
   it("renders protected content when admin auth check passes", async () => {
     useAuth.mockReturnValue([{ token: "valid-token" }, jest.fn()]);
     axios.get.mockResolvedValue({ data: { ok: true } });

@@ -97,6 +97,7 @@ describe("authMiddleware Integration Tests", () => {
   });
 
   describe("requireSignIn", () => {
+    // added the test case, Daniel Lai, A0192327A
     it("verifies a token issued by loginController and sets req.user", async () => {
       const req = {
         headers: {
@@ -115,6 +116,7 @@ describe("authMiddleware Integration Tests", () => {
       expect(next).toHaveBeenCalled();
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("rejects an expired token that was originally issued by loginController", async () => {
       const freshToken = await loginAndGetToken("regular@example.com", "password123");
       const decoded = JWT.decode(freshToken);
@@ -138,6 +140,7 @@ describe("authMiddleware Integration Tests", () => {
       expect(logSpy).toHaveBeenCalled();
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("rejects a fake token", async () => {
       const req = {
         headers: {
@@ -156,6 +159,7 @@ describe("authMiddleware Integration Tests", () => {
   });
 
   describe("isAdmin", () => {
+    // added the test case, Daniel Lai, A0192327A
     it("rejects a request from a non-admin user", async () => {
       const req = {
         user: {
@@ -177,6 +181,7 @@ describe("authMiddleware Integration Tests", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("grants access to an admin user", async () => {
       const req = {
         user: {
@@ -192,6 +197,7 @@ describe("authMiddleware Integration Tests", () => {
       expect(res.status).not.toHaveBeenCalled();
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("rejects a request without req.user and returns middleware error", async () => {
       const req = {};
       const res = makeRes();
@@ -212,6 +218,7 @@ describe("authMiddleware Integration Tests", () => {
       expect(logSpy).toHaveBeenCalled();
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("blocks regular users in requireSignIn -> isAdmin middleware chain", async () => {
       const token = await loginAndGetToken("regular@example.com", "password123");
       const req = {
@@ -232,6 +239,7 @@ describe("authMiddleware Integration Tests", () => {
       expect(finalNext).not.toHaveBeenCalled();
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("allows admin users in requireSignIn -> isAdmin middleware chain", async () => {
       const token = await loginAndGetToken("admin@example.com", "password123");
       const req = {

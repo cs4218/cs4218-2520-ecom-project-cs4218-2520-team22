@@ -7,11 +7,7 @@ describe("authHelper Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  afterEach(() => {
-    jest.resetModules();
-  });
-
+  
   describe("hashPassword Function", () => {
     // added the test case, Daniel Lai, A0192327A
     // Most of the tests should be handled at the integration testing level, except for error handling in hashPassword

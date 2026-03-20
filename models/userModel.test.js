@@ -122,6 +122,7 @@ describe("User Model Unit Tests", () => {
     expect(user.role).toBe(1);
   });
 
+  // added test case, Daniel Lai, A0192327A
   it("should trim name field", () => {
     const user = new userModel({
       name: "    Test    ",
