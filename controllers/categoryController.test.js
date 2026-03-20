@@ -1,4 +1,3 @@
-// Lim Jun Xian A0259094U
 import categoryModel from "../models/categoryModel";
 import {
     categoryController,
@@ -36,7 +35,7 @@ beforeEach(() => {
 afterEach(() => {
     consoleSpy.mockRestore();
 });
-
+// Lim Jun Xian A0259094U
 describe("categoryController", () => {
     let res
     const req = {}
@@ -81,7 +80,7 @@ describe("categoryController", () => {
         expect(consoleSpy).toBeCalledWith(mockError);
     });
 });
-
+// Lim Jun Xian A0259094U
 describe("singleCategoryController", () => {
     let res, req
 

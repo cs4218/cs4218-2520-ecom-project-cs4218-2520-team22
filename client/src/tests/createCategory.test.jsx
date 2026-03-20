@@ -18,7 +18,6 @@ jest.mock("./../components/AdminMenu", () => () => <div>AdminMenu</div>);
 
 jest.mock("../components/Form/CategoryForm", () => (props) => {
     const { value, setValue, handleSubmit, ariaLabel } = props;
-    console.log("MOCK CategoryForm used", props);
     return (
         <form onSubmit={handleSubmit}>
             <input

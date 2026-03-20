@@ -35,4 +35,4 @@ jobs:
         run: npm run test:backend
 
       - name: Run frontend tests
-        run: npm run test:frontned
+        run: npm run test:frontend
