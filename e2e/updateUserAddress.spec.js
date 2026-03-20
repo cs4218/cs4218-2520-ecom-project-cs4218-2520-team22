@@ -1,17 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = "http://localhost:3000";
-
 test('Update user address successfully while navigating from Cart Page -> Login Page -> Profile Page', async ({ page }) => {
-    await page.goto(BASE_URL);
+    await page.goto('/');
 
     // Navigate to Cart Page through Header
     await page.getByRole('link', { name: 'Cart' }).click();
     
     // Login from Cart Page
     await page.getByRole('button', { name: 'Please login to checkout' }).click();
-    await page.getByRole("textbox", { name: "Enter Your Email" }).fill("cs4218@test.com"); // Use test account
-    await page.getByRole("textbox", { name: "Enter Your Password" }).fill("cs4218@test.com");
+    await page.getByRole("textbox", { name: "Enter Your Email" }).fill("e2e.user@test.com"); // Use test account
+    await page.getByRole("textbox", { name: "Enter Your Password" }).fill("User@e2e123");
     await page.getByRole("button", { name: "Login" }).click();
 
     // Navigate back to Cart Page
