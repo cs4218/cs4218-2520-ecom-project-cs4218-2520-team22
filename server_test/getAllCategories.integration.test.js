@@ -1,9 +1,10 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import app from "../../app.js";
-import categoryModel from "../../models/categoryModel.js";
-import { categoryController } from "../../controllers/categoryController.js";
+import app from "../app.js";
+import categoryModel from "../models/categoryModel.js";
+import { categoryController } from "../controllers/categoryController.js";
+import { jest } from "@jest/globals";
 
 const getAllCategoriesPath = "/api/v1/category/get-category";
 

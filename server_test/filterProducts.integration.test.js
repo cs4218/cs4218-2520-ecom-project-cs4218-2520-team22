@@ -1,10 +1,11 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import app from "../../app.js";
-import productModel from "../../models/productModel.js";
-import categoryModel from "../../models/categoryModel.js";
-import { productFiltersController } from "../../controllers/productController.js";
+import app from "../app.js";
+import productModel from "../models/productModel.js";
+import categoryModel from "../models/categoryModel.js";
+import { productFiltersController } from "../controllers/productController.js";
+import { jest } from "@jest/globals";
 
 const filterProductsPath = "/api/v1/product/product-filters";
 
