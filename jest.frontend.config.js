@@ -14,6 +14,9 @@ export default {
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "identity-obj-proxy",
+    "^react$": "<rootDir>/client/node_modules/react",
+    "^react-dom$": "<rootDir>/client/node_modules/react-dom",
+    "^react-dom/(.*)$": "<rootDir>/client/node_modules/react-dom/$1",
   },
 
   // // ignore all node_modules except styleMock (needed for css imports)
