@@ -36,8 +36,11 @@ test("E2E-BROWSE-02: Filter by E2E Electronics category shows only Electronics p
 }) => {
   // Mark Wang, A0337880U
   await page.goto("/");
-  // Wait for categories to load and find the E2E Electronics checkbox
-  await page.getByText(ELECTRONICS_CAT).first().click();
+  // Wait for categories to load and check the E2E Electronics checkbox control
+  const electronicsCheckbox = page.getByRole("checkbox", { name: ELECTRONICS_CAT });
+  await expect(electronicsCheckbox).toBeVisible({ timeout: 10000 });
+  await electronicsCheckbox.check();
+  await expect(electronicsCheckbox).toBeChecked();
 
   // E2E Laptop should be visible
   await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 8000 });
@@ -67,7 +70,10 @@ test("E2E-BROWSE-04: Reset Filters button restores all products", async ({ page 
   await page.goto("/");
 
   // Apply a category filter first
-  await page.getByText(ELECTRONICS_CAT).first().click();
+  const electronicsCheckbox = page.getByRole("checkbox", { name: ELECTRONICS_CAT });
+  await expect(electronicsCheckbox).toBeVisible({ timeout: 10000 });
+  await electronicsCheckbox.check();
+  await expect(electronicsCheckbox).toBeChecked();
   await expect(page.getByText(SHIRT)).not.toBeVisible({ timeout: 5000 });
 
   // Click Reset Filters — this triggers window.location.reload()
@@ -75,7 +81,7 @@ test("E2E-BROWSE-04: Reset Filters button restores all products", async ({ page 
   await page.waitForLoadState("networkidle");
 
   // After reset, both E2E products should be visible
-  await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 10000 });
   await expect(page.getByText(SHIRT)).toBeVisible({ timeout: 5000 });
 });
 
@@ -115,7 +121,7 @@ test("E2E-BROWSE-06: Search bar returns products matching the keyword", async ({
 
   // Should navigate to /search and display results
   await page.waitForURL(/\/search/, { timeout: 8000 });
-  await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 8000 });
 });
 
 // E2E-BROWSE-07
@@ -136,14 +142,14 @@ test("E2E-BROWSE-08: Clicking More Details opens product details page with full 
 }) => {
   // Mark Wang, A0337880U
   await page.goto("/");
-  // Find the card for E2E Laptop 1 and click More Details
-  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
+  // Find the card for E2E Laptop 6 and click More Details
+  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP6 });
   await laptopCard.getByRole("button", { name: "More Details" }).click();
 
-  // Should navigate to /product/E2E-Laptop-1 (or similar slug)
+  // Should navigate to /product/E2E-Laptop-6 (or similar slug)
   await page.waitForURL(/\/product\//, { timeout: 8000 });
-  await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 8000 });
   // Price and description should be on the product page
-  await expect(page.getByText(/\$100\.00/)).toBeVisible();
-  await expect(page.getByText(/E2E test laptop number 1/)).toBeVisible();
+  await expect(page.getByText(/\$600\.00/)).toBeVisible();
+  await expect(page.getByText(/E2E test laptop number 6/)).toBeVisible();
 });
