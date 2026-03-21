@@ -12,6 +12,7 @@ export const requireSignIn = async (req, res, next) => {
         next();
     } catch (error) {
         console.log(error);
+        return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 };
 

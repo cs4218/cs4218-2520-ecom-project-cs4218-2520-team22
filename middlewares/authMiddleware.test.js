@@ -44,8 +44,9 @@ describe("Auth Middleware Component", () => {
         throw new Error("Invalid token");
       });
       jest.spyOn(console, 'log').mockImplementation(() => { });
+      const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
-      await requireSignIn(testReq, null, mockNext);
+      await requireSignIn(testReq, mockRes, mockNext);
       expect(JWT.verify).toHaveBeenCalledWith(
         "invalid-token",
         process.env.JWT_SECRET
@@ -53,6 +54,7 @@ describe("Auth Middleware Component", () => {
       expect(testReq.user).toBeNull();
       expect(mockNext).not.toHaveBeenCalled();
       expect(console.log).toHaveBeenCalled();
+      expect(mockRes.status).toHaveBeenCalledWith(401);
     });
   });
 
