@@ -54,7 +54,7 @@ describe("authController Integration Tests", () => {
   });
 
   describe("just registerController", () => {
-    // added test cases, Daniel Lai, A0192327A
+    // added the test case, Daniel Lai, A0192327A
     it("registers a user successfully", async () => {
       const registerReq = {
         body: {
@@ -80,7 +80,7 @@ describe("authController Integration Tests", () => {
     });
 
     // other negative test scenarios covered in authController.test.js already
-    // added test case, Daniel Lai, A0192327A
+    // added the test case, Daniel Lai, A0192327A
     it("does not allow registration with an email that is already registered", async () => {
       const registerReq = {
         body: {

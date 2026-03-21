@@ -107,7 +107,7 @@ describe("User Model Unit Tests", () => {
     expect(user.role).toBe(0);
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, aniel Lai, A0192327A
   it("should allow role to be set to 1", () => {
     const user = new userModel({
       name: "Test",
@@ -122,7 +122,7 @@ describe("User Model Unit Tests", () => {
     expect(user.role).toBe(1);
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, aniel Lai, A0192327A
   it("should trim name field", () => {
     const user = new userModel({
       name: "    Test    ",

@@ -24,7 +24,7 @@ describe("User Model Integration Tests", () => {
     await mongo.stop();
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("it adds a user to database with default role of 0", async () => {
     const user = new User({
       name: "Test",
@@ -46,7 +46,7 @@ describe("User Model Integration Tests", () => {
     expect(saved.role).toBe(0);
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("it adds a user to database with role of 1 if specified", async () => {
     const user = new User({
       name: "Test",
@@ -70,7 +70,7 @@ describe("User Model Integration Tests", () => {
   });
 
   // not testing rejecting missing fields because it seems redundant with unit tests
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should reject user with duplicate email", async () => {
     await User.create({
       name: "Test",
@@ -93,7 +93,7 @@ describe("User Model Integration Tests", () => {
     await expect(user2.save()).rejects.toThrow(/duplicate key/);
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should allow multiple users with same name but different email", async () => {
     await User.create({
       name: "Test",
@@ -116,7 +116,7 @@ describe("User Model Integration Tests", () => {
   });
 
   // in a way this set of cases can be viewed as library sanity checks
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should be able to find user by email and answer after registration", async () => {
     await User.create({
       name: "Test",
@@ -133,7 +133,7 @@ describe("User Model Integration Tests", () => {
     expect(foundUser.name).toBe("Test");
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should not be able to find user by email that does not exist", async () => {
     await User.create({
       name: "Test",
@@ -149,7 +149,7 @@ describe("User Model Integration Tests", () => {
     expect(foundUser).toBeNull();
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should not be able to find user by correct email but wrong answer", async () => {
     await User.create({
       name: "Test",
@@ -166,7 +166,7 @@ describe("User Model Integration Tests", () => {
   });
 
   // negative cases for reset password already covered above
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should be able to reset password of specified user", async () => {
     await User.create({
       name: "Test",
@@ -184,7 +184,7 @@ describe("User Model Integration Tests", () => {
     await expect(User.findOne({ email: "test@test.com", answer: "blue" })).resolves.not.toHaveProperty("password", "123456");
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("should be able to find user by id", async () => {
     await User.create({
       name: "Test",
@@ -202,7 +202,7 @@ describe("User Model Integration Tests", () => {
     expect(foundUser.name).toBe("Test");
   });
 
-  // added test case, Daniel Lai, A0192327A
+  // added the test case, Daniel Lai, A0192327A
   it("returns null when finding a user by a non-existent id", async () => {
     const missingUserId = new mongoose.Types.ObjectId();
 
