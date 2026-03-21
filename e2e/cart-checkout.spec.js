@@ -16,6 +16,28 @@ import { E2E_PREFIX } from "./helpers/globalSetup.js";
 const LAPTOP1 = `${E2E_PREFIX}Laptop 1`;
 const SHIRT = `${E2E_PREFIX}Blue Shirt`;
 
+const findProductCardOnHome = async (page, productName) => {
+  await page.waitForSelector(".home-page", { timeout: 10000 });
+  const card = page.locator(".home-page .card.m-2", { hasText: productName });
+  const loadMoreBtn = page.getByRole("button", { name: /Loadmore/i });
+
+  for (let i = 0; i < 20; i++) {
+    if ((await card.count()) > 0) {
+      await card.first().scrollIntoViewIfNeeded();
+      return card.first();
+    }
+
+    if (await loadMoreBtn.isVisible()) {
+      await loadMoreBtn.click();
+      await page.waitForTimeout(1000);
+      continue;
+    }
+    await page.waitForTimeout(500);
+  }
+
+  return card.first();
+};
+
 // E2E-CART-01
 test("E2E-CART-01: Add product to cart updates the cart badge in the header", async ({
   page,
@@ -23,7 +45,7 @@ test("E2E-CART-01: Add product to cart updates the cart badge in the header", as
   // Mark Wang, A0337880U
   await page.goto("/");
   // Find the E2E Laptop 1 card and click ADD TO CART
-  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
+  const laptopCard = await findProductCardOnHome(page, LAPTOP1);
   await laptopCard.getByRole("button", { name: "ADD TO CART" }).click();
 
   // Cart badge in the header should show count ≥ 1
@@ -37,7 +59,7 @@ test("E2E-CART-02: Cart persists across page refresh (localStorage)", async ({ p
   // Mark Wang, A0337880U
   await page.goto("/");
   // Add one item
-  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
+  const laptopCard = await findProductCardOnHome(page, LAPTOP1);
   await laptopCard.getByRole("button", { name: "ADD TO CART" }).click();
   await expect(page.locator(".ant-badge")).toContainText("1", { timeout: 5000 });
 
@@ -52,7 +74,7 @@ test("E2E-CART-03: Remove product from cart updates the cart page", async ({ pag
   // Mark Wang, A0337880U
   await page.goto("/");
   // Add E2E Laptop 1 to cart
-  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
+  const laptopCard = await findProductCardOnHome(page, LAPTOP1);
   await laptopCard.getByRole("button", { name: "ADD TO CART" }).click();
 
   // Navigate to cart page
@@ -79,7 +101,7 @@ test("E2E-CART-04: Cart page shows correct total for multiple items", async ({ p
 
   // Add E2E Laptop 1 ($100) and navigate to cart
   // Both products may not be on the same page at once; add Laptop 1 first
-  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
+  const laptopCard = await findProductCardOnHome(page, LAPTOP1);
   await expect(laptopCard).toBeVisible({ timeout: 8000 });
   await laptopCard.getByRole("button", { name: "ADD TO CART" }).click();
 
@@ -104,7 +126,7 @@ test("E2E-CART-05: Proceeding to checkout without login shows login prompt", asy
   await page.waitForLoadState("networkidle");
 
   // Add an item to cart
-  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
+  const laptopCard = await findProductCardOnHome(page, LAPTOP1);
   await expect(laptopCard).toBeVisible({ timeout: 8000 });
   await laptopCard.getByRole("button", { name: "ADD TO CART" }).click();
 

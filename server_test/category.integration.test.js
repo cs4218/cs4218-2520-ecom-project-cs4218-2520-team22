@@ -5,7 +5,6 @@ import { connect, disconnect, clearCollections } from "./helpers/db.js";
 import { createAdmin, createUser, tokenFor } from "./helpers/auth.js";
 import createApp from "./helpers/testApp.js";
 import categoryModel from "../models/categoryModel.js";
-import { JsonWebTokenError } from "jsonwebtoken";
 
 const app = createApp();
 
