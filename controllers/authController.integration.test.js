@@ -4,7 +4,10 @@ import {
   registerController,
   loginController,
   forgotPasswordController,
+  updateProfileController,
 } from "./authController.js";
+import userModel from "../models/userModel.js";
+import { comparePassword } from "../helpers/authHelper.js";
 
 let mongo;
 let originalJwtSecret;
@@ -118,7 +121,8 @@ describe("authController Integration Tests", () => {
       );
     });
 
-    it("allows registartion with the same name but different email", async () => {
+    // added the test case, Daniel Lai, A0192327A
+    it("allows registration with the same name but different email", async () => {
       const registerReq = {
         body: {
           name: "Test User",
@@ -157,6 +161,7 @@ describe("authController Integration Tests", () => {
   });
 
   describe("just loginController", () => {
+    // added the test case, Daniel Lai, A0192327A
     it("fails to login with unregistered email", async () => {
       const loginReq = {
         body: {
@@ -179,6 +184,7 @@ describe("authController Integration Tests", () => {
   });
 
   describe("just forgotPasswordController", () => {
+    // added the test case, Daniel Lai, A0192327A
     it("fails to reset password of user that doesn't exist", async () => {
       const forgotReq = {
         body: {
@@ -218,6 +224,7 @@ describe("authController Integration Tests", () => {
       await registerController(registerReq, registerRes);
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("registers then logs in successfully", async () => {
       const loginReq = {
         body: {
@@ -245,6 +252,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("registers then fails to login with wrong password", async () => {
       const loginReq = {
         body: {
@@ -265,6 +273,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("resets password successfully", async () => {
       const forgotReq = {
         body: {
@@ -286,6 +295,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("fails to reset password with wrong answer", async () => {
       const forgotReq = {
         body: {
@@ -307,6 +317,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("fails to reset password with wrong answer and then fails to login with new password", async () => {
       const forgotReq = {
         body: {
@@ -337,6 +348,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("fails to reset password with wrong answer and then logs in with old password", async () => {
       const forgotReq = {
         body: {
@@ -368,6 +380,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("resets password and allows login with the new password", async () => {
       const forgotReq = {
         body: {
@@ -399,6 +412,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     it("resets password and does not allow login with the old password", async () => {
       const forgotReq = {
         body: {
@@ -427,6 +441,50 @@ describe("authController Integration Tests", () => {
           message: "Invalid Password",
         })
       );
+    });
+
+    // written to cover uncovered line in authController's updateProfileController
+    // otherwise ignoring other tests for updateProfileController as out of scope
+    // added the test case, Daniel Lai, A0192327A
+    it("should update all details of a user successfully (except for email!) if provided", async () => {
+      const existingUser = await userModel.findOne({ email: "test@example.com" });
+      const updateReq = {
+        user: {
+          _id: existingUser._id,
+        },
+        body: {
+          name: "Updated Test User",
+          email: "updated@example.com",
+          password: "updatedPassword123",
+          phone: "87654321",
+          address: "Updated Address",
+        },
+      };
+      const updateRes = makeRes();
+
+      await updateProfileController(updateReq, updateRes);
+      const savedUser = await userModel.findById(existingUser._id);
+
+      expect(updateRes.status).toHaveBeenCalledWith(200);
+      expect(updateRes.body).toEqual(
+        expect.objectContaining({
+          success: true,
+          message: "Profile Updated Successfully",
+        })
+      );
+      const updatedUser = updateRes.body.updatedUser;
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser._id.toString()).toBe(existingUser._id.toString());
+      expect(updatedUser.name).toBe("Updated Test User");
+      expect(updatedUser.phone).toBe("87654321");
+      expect(updatedUser.address).toBe("Updated Address");
+      expect(updatedUser.email).toBe("test@example.com");
+      expect(savedUser.name).toBe("Updated Test User");
+      expect(savedUser.phone).toBe("87654321");
+      expect(savedUser.address).toBe("Updated Address");
+      expect(savedUser.email).toBe("test@example.com");
+      expect(savedUser.password).not.toBe("updatedPassword123");
+      expect(await comparePassword("updatedPassword123", savedUser.password)).toBe(true);
     });
   });
 });

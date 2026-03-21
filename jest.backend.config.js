@@ -30,15 +30,16 @@ export default {
     "!server_test/**",
     "!test-results/**",
 
+    "!routes/**", // doesn't make sense to test at unit level
     "!*.config.js",
     "!server.js",
   ],
   coverageThreshold: {
     global: {
-      lines: 85,
-      functions: 85,
+      lines: 90,
+      functions: 90,
       branches: 80,
-      statements: 85,
+      statements: 90,
     },
   },
 };
