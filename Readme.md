@@ -156,6 +156,14 @@ To begin unit testing with Jest in your project, follow these steps:
 | MANSOOR SYED ALI | <ul><li>pages/ProductDetails.js</li><li>pages/CategoryProduct.js</li><li>pages/Contact.js</li><li>pages/Policy.js</li><li>components/Footer.js</li><li>components/Header.js</li><li>components/Layout.js</li><li>components/Spinner.js</li><li>pages/About.js</li><li>pages/Pagenotfound.js</li></ul> | <ul><li>controllers/productController.js<ul><li>getProductController</li><li>getSingleProductController</li><li>productPhotoController</li><li>productFiltersController</li><li>productCountController</li><li>productListController</li><li>searchProductController</li><li>realtedProductController</li><li>productCategoryController</li></ul></li><li>models/productModel.js</li><li>config/db.js</li></ul>
 | LIM JUN XIAN | <ul><li>pages/Homepage.js</li><li>context/cart.js</li><li>pages/CartPage.js</li><li>hooks/useCategory.js</li><li>pages/Categories.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>categoryController</li><li>singleCategoryController</li></ul><li>controllers/productController.js<ul><li>braintreeTokenController</li><li>brainTreePaymentController</li></ul><li>models/categoryModel.js</li>
 
+## Milestone 2
+| Name | Integration Tests | UI Tests | Miscellaneous 
+| :---- | :---- | :---- | :----
+| LAI XIONG XING DANIEL 
+| WANG QINZHE
+| SONG YICHAO
+| MANSOOR SYED ALI
+| LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js<li>updateUserAddress.spec.js</li></ul> | <ul>NIL</ul>
 
 ## 7. CI workflows
 
