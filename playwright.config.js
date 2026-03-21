@@ -1,4 +1,6 @@
 // QINZHE Wang, A0337880U
+// Song Yichao, A0255686M
+
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
