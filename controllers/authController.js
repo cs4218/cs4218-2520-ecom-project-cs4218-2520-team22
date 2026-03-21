@@ -241,7 +241,7 @@ export const orderStatusController = async (req, res) => {
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
-      { new: true }
+      { new: true, runValidators: true }
     );
     res.json(orders);
   } catch (error) {
