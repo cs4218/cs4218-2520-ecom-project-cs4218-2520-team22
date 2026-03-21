@@ -12,7 +12,7 @@ import { E2E_PREFIX } from "./helpers/globalSetup.js";
 // Seed data constants (matching globalSetup)
 const ELECTRONICS_CAT = `${E2E_PREFIX}Electronics`;
 const CLOTHING_CAT = `${E2E_PREFIX}Clothing`;
-const LAPTOP1 = `${E2E_PREFIX}Laptop 1`;
+const LAPTOP6 = `${E2E_PREFIX}Laptop 6`;
 const SHIRT = `${E2E_PREFIX}Blue Shirt`;
 
 // E2E-BROWSE-01
@@ -23,9 +23,9 @@ test("E2E-BROWSE-01: Home page displays seeded products with name, price, and de
   await page.goto("/");
 
   // At least the first E2E laptop should be visible in the product listing
-  await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 10000 });
   // Price shown as currency
-  await expect(page.getByText(/\$100\.00/)).toBeVisible();
+  await expect(page.getByText(/\$600\.00/)).toBeVisible();
   // "More Details" button present for products
   await expect(page.getByRole("button", { name: "More Details" }).first()).toBeVisible();
 });
@@ -40,7 +40,7 @@ test("E2E-BROWSE-02: Filter by E2E Electronics category shows only Electronics p
   await page.getByText(ELECTRONICS_CAT).first().click();
 
   // E2E Laptop should be visible
-  await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 8000 });
   // E2E Blue Shirt (Clothing) should disappear
   await expect(page.getByText(SHIRT)).not.toBeVisible({ timeout: 5000 });
 });

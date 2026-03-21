@@ -55,10 +55,6 @@
     border-bottom: 1px solid rgba(128, 128, 128, 0.337);
   }
   
-  .ant-checkbox-wrapper:first-of-type {
-    margin-left: 8px;
-  }
-  
   .ant-checkbox-wrapper {
     margin: 2px;
   }
