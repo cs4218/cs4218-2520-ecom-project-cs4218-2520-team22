@@ -104,9 +104,10 @@ describe("authMiddleware Integration Tests", () => {
           authorization: await loginAndGetToken("regular@example.com", "password123"),
         },
       };
+      const res = makeRes();
       const next = jest.fn();
 
-      await requireSignIn(req, null, next);
+      await requireSignIn(req, res, next);
 
       expect(req.user).toEqual(
         expect.objectContaining({
@@ -114,6 +115,8 @@ describe("authMiddleware Integration Tests", () => {
         })
       );
       expect(next).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
 
     // added the test case, Daniel Lai, A0192327A
@@ -130,13 +133,18 @@ describe("authMiddleware Integration Tests", () => {
           authorization: expiredToken,
         },
       };
+      const res = makeRes();
       const next = jest.fn();
       const logSpy = jest.spyOn(console, "log").mockImplementation(() => { });
 
-      await requireSignIn(req, null, next);
+      await requireSignIn(req, res, next);
 
       expect(req.user).toBeUndefined();
       expect(next).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ success: false, message: "Unauthorized" })
+      );
       expect(logSpy).toHaveBeenCalled();
     });
 
@@ -147,13 +155,18 @@ describe("authMiddleware Integration Tests", () => {
           authorization: "invalid-token",
         },
       };
+      const res = makeRes();
       const next = jest.fn();
       const logSpy = jest.spyOn(console, "log").mockImplementation(() => { });
 
-      await requireSignIn(req, null, next);
+      await requireSignIn(req, res, next);
 
       expect(req.user).toBeUndefined();
       expect(next).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ success: false, message: "Unauthorized" })
+      );
       expect(logSpy).toHaveBeenCalled();
     });
   });
