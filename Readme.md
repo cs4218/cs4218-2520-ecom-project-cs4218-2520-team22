@@ -84,8 +84,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 5. **Create account and token**
 
    - Create a SonarQube account.
-   - Generate a User Token.
-   - Add the token to your `.env` file.
+   - Generate a User Token, and add it to `sonar-project.properties`
 
 6. **Install Sonar scanner package**
 
