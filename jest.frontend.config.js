@@ -19,26 +19,18 @@ export default {
     "^react-dom/(.*)$": "<rootDir>/client/node_modules/react-dom/$1",
   },
 
-  // // ignore all node_modules except styleMock (needed for css imports)
-  // transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
-
   // only run these tests
   testMatch: [
-    // Original
-    // "<rootDir>/client/src/pages/Auth/*.test.js",
-
     "<rootDir>/client/src/**/*.test.js",
     "<rootDir>/client/src/**/*.test.jsx",
   ],
 
   // exclude _site directory (generated build files)
   testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
+  
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
-    // Original
-    // "client/src/pages/Auth/**",
-
     "client/src/**/*.{js,jsx}",
     "!client/src/_site/**",
     "!client/src/**/*.test.{js,jsx}",
@@ -57,5 +49,4 @@ export default {
     },
   },
   setupFilesAfterEnv: ["<rootDir>/client/src/setupTests.js"],
-
 };

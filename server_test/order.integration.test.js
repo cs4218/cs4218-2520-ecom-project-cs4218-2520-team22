@@ -68,7 +68,7 @@ describe("Story 2.4 — Order Integration", () => {
 
   // ORD-INT-01
   test("ORD-INT-01: Create order with valid user token — order persisted in DB with buyer ref", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/braintree/payment")
       .set("Authorization", userToken)
@@ -91,7 +91,7 @@ describe("Story 2.4 — Order Integration", () => {
   // ORD-INT-02
   // Bug fixed: requireSignIn now returns 401 when no token is provided.
   test("ORD-INT-02: Create order without auth token returns 401", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const ordersBefore = await orderModel.countDocuments();
 
     const res = await request(app)
@@ -108,7 +108,7 @@ describe("Story 2.4 — Order Integration", () => {
 
   // ORD-INT-03
   test("ORD-INT-03: Get user orders returns orders for the authenticated user only", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     // Create an order for regularUser and another for adminUser
     await createOrder(regularUser._id, [testProduct._id]);
     await createOrder(adminUser._id, [testProduct._id]);
@@ -125,7 +125,7 @@ describe("Story 2.4 — Order Integration", () => {
 
   // ORD-INT-04
   test("ORD-INT-04: User orders include populated product data (not just IDs)", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     await createOrder(regularUser._id, [testProduct._id]);
 
     const res = await request(app)
@@ -146,7 +146,7 @@ describe("Story 2.4 — Order Integration", () => {
 
   // ORD-INT-05
   test("ORD-INT-05: Admin get all orders returns all orders from all users", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     await createOrder(regularUser._id, [testProduct._id]);
     await createOrder(adminUser._id, [testProduct._id]);
 
@@ -161,7 +161,7 @@ describe("Story 2.4 — Order Integration", () => {
 
   // ORD-INT-06
   test("ORD-INT-06: Admin all-orders with non-admin token returns 401", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .get("/api/v1/auth/all-orders")
       .set("Authorization", userToken);
@@ -171,7 +171,7 @@ describe("Story 2.4 — Order Integration", () => {
 
   // ORD-INT-07
   test("ORD-INT-07: Admin update order status changes status field in DB", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const order = await createOrder(regularUser._id, [testProduct._id]);
 
     const res = await request(app)
@@ -189,15 +189,16 @@ describe("Story 2.4 — Order Integration", () => {
   // Bug fixed: orderStatusController now uses { runValidators: true }.
   // Mongoose enum validation rejects invalid status values on update.
   test("ORD-INT-08: Update order status with invalid status returns 500 and DB is unchanged", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const order = await createOrder(regularUser._id, [testProduct._id]);
 
+    jest.spyOn(console, "log").mockImplementation(() => { }); // suppress expected error
     const res = await request(app)
       .put(`/api/v1/auth/order-status/${order._id}`)
       .set("Authorization", adminToken)
       .send({ status: "InvalidStatus" });
-
-    // With runValidators: true, Mongoose rejects the invalid enum value
+    
+        // With runValidators: true, Mongoose rejects the invalid enum value
     expect(res.status).toBe(500);
 
     // Status in DB must remain unchanged

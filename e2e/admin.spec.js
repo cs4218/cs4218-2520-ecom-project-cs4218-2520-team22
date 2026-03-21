@@ -12,7 +12,7 @@ import { E2E_PREFIX } from "./helpers/globalSetup.js";
 
 // E2E-ADMIN-01
 test("E2E-ADMIN-01: Admin can access the admin dashboard", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin");
 
@@ -27,7 +27,7 @@ test("E2E-ADMIN-01: Admin can access the admin dashboard", async ({ page }) => {
 test("E2E-ADMIN-02: Non-admin user is blocked from admin routes and redirected", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsUser(page);
   await page.goto("/dashboard/admin");
 
@@ -43,24 +43,29 @@ test("E2E-ADMIN-02: Non-admin user is blocked from admin routes and redirected",
 test("E2E-ADMIN-03: Admin can create a new category and it appears in the list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/create-category");
 
   const newCatName = `${E2E_PREFIX}Cat ${Date.now()}`;
   // CategoryForm has placeholder "Enter new category"
-  await page.getByPlaceholder("Enter new category").fill(newCatName);
-  await page.getByRole("button", { name: "Submit" }).first().click();
+  const createCategoryForm = page
+    .locator("form")
+    .filter({ has: page.getByPlaceholder("Enter new category") })
+    .first();
+  await createCategoryForm.getByPlaceholder("Enter new category").fill(newCatName);
+  await createCategoryForm.getByRole("button", { name: "Submit" }).click();
 
   // Success toast and category appears in the table
-  await expect(page.getByText(newCatName)).toBeVisible({ timeout: 8000 });
+  const categoryRows = page.locator("table tbody tr");
+  await expect(categoryRows.filter({ hasText: newCatName })).toHaveCount(1, { timeout: 8000 });
 });
 
 // E2E-ADMIN-04
 test("E2E-ADMIN-04: Admin can create a new product and it is navigated to products list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/create-product");
 
@@ -68,7 +73,9 @@ test("E2E-ADMIN-04: Admin can create a new product and it is navigated to produc
 
   // Select category — Ant Design Select: click the selector, wait for dropdown, pick option
   await page.locator(".ant-select").first().click();
-  await page.getByText(`${E2E_PREFIX}Electronics`).first().click();
+  await page.locator(".ant-select-item-option", {
+    hasText: `${E2E_PREFIX}Electronics`,
+  }).first().click();
 
   // Fill text fields
   await page.getByPlaceholder("write a name").fill(newProductName);
@@ -81,12 +88,15 @@ test("E2E-ADMIN-04: Admin can create a new product and it is navigated to produc
 
   // After creation, navigates to /dashboard/admin/products
   await page.waitForURL(/\/dashboard\/admin\/products/, { timeout: 10000 });
-  await expect(page.getByText(newProductName)).toBeVisible({ timeout: 8000 });
+  const createdProductCardTitle = page.locator("a.product-link .card-title", {
+    hasText: newProductName,
+  });
+  await expect(createdProductCardTitle).toBeVisible({ timeout: 8000 });
 });
 
 // E2E-ADMIN-05
 test("E2E-ADMIN-05: Admin can update an existing product", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   // Navigate to products list — each product card is a Link to the update page
   await page.goto("/dashboard/admin/products");
@@ -95,6 +105,7 @@ test("E2E-ADMIN-05: Admin can update an existing product", async ({ page }) => {
   const laptopLink = page.locator("a.product-link", { hasText: `${E2E_PREFIX}Laptop 2` });
   await expect(laptopLink).toBeVisible({ timeout: 10000 });
   await laptopLink.click();
+  await page.waitForTimeout(2000); // Wait for API call
 
   // Should navigate to the update product page
   await page.waitForURL(/\/dashboard\/admin\/product\//, { timeout: 8000 });
@@ -115,7 +126,7 @@ test("E2E-ADMIN-05: Admin can update an existing product", async ({ page }) => {
 test("E2E-ADMIN-06: Admin can delete a product and it is removed from the list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/products");
 
@@ -141,7 +152,7 @@ test("E2E-ADMIN-06: Admin can delete a product and it is removed from the list",
 
 // E2E-ADMIN-07
 test("E2E-ADMIN-07: Admin can update order status from the orders page", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/orders");
 
@@ -152,9 +163,11 @@ test("E2E-ADMIN-07: Admin can update order status from the orders page", async (
   // NOTE: AdminOrders.js uses a local status array ["Not Process", "Processing", ...]
   // which differs from the DB enum ["Not Processed", ...] — this is a UI bug.
   // We change to "Processing" which is consistent in both arrays.
-  const statusSelect = page.locator(".ant-select").first();
+  const statusSelect = page.locator("td .ant-select").first();
   await statusSelect.click();
-  await page.getByText("Processing").first().click();
+  await page.locator(".ant-select-item-option", {
+    hasText: "Processing",
+  }).first().click();
 
   // Wait for the API call to complete (no navigation, just re-fetch)
   await page.waitForTimeout(1500);
@@ -164,7 +177,7 @@ test("E2E-ADMIN-07: Admin can update order status from the orders page", async (
 
 // E2E-ADMIN-08
 test("E2E-ADMIN-08: Admin can view all orders from all customers", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/orders");
 
