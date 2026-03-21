@@ -5,6 +5,7 @@ import { connect, disconnect, clearCollections } from "./helpers/db.js";
 import { createAdmin, createUser, tokenFor } from "./helpers/auth.js";
 import createApp from "./helpers/testApp.js";
 import categoryModel from "../models/categoryModel.js";
+import { JsonWebTokenError } from "jsonwebtoken";
 
 const app = createApp();
 
@@ -75,6 +76,7 @@ describe("POST /api/v1/category/create-category", () => {
   });
 
   it("CAT-INT-03b returns 401 when no token is provided (bug fixed)", async () => {
+    jest.spyOn(console, "log").mockImplementation(() => { }); // Suppress expected log
     const res = await request(app)
       .post("/api/v1/category/create-category")
       .send({ name: "No Auth Category" });

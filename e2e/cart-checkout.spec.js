@@ -20,7 +20,7 @@ const SHIRT = `${E2E_PREFIX}Blue Shirt`;
 test("E2E-CART-01: Add product to cart updates the cart badge in the header", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Find the E2E Laptop 1 card and click ADD TO CART
   const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
@@ -34,7 +34,7 @@ test("E2E-CART-01: Add product to cart updates the cart badge in the header", as
 
 // E2E-CART-02
 test("E2E-CART-02: Cart persists across page refresh (localStorage)", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Add one item
   const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
@@ -49,7 +49,7 @@ test("E2E-CART-02: Cart persists across page refresh (localStorage)", async ({ p
 
 // E2E-CART-03
 test("E2E-CART-03: Remove product from cart updates the cart page", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Add E2E Laptop 1 to cart
   const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });
@@ -70,7 +70,7 @@ test("E2E-CART-03: Remove product from cart updates the cart page", async ({ pag
 
 // E2E-CART-04
 test("E2E-CART-04: Cart page shows correct total for multiple items", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Clear cart first via localStorage (ensure fresh state)
   await page.evaluate(() => localStorage.removeItem("cart"));
@@ -96,7 +96,7 @@ test("E2E-CART-04: Cart page shows correct total for multiple items", async ({ p
 test("E2E-CART-05: Proceeding to checkout without login shows login prompt", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   // Ensure not logged in: clear auth from localStorage
   await page.goto("/");
   await page.evaluate(() => localStorage.removeItem("auth"));
@@ -130,14 +130,14 @@ test("E2E-CART-05: Proceeding to checkout without login shows login prompt", asy
 test.skip("E2E-CART-06: Complete payment flow (Braintree sandbox — skipped in CI)", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   // Would require: login → add item → fill card details in Braintree DropIn → Make Payment
   // Skipped: Braintree sandbox requires external credentials.
 });
 
 // E2E-CART-07
 test("E2E-CART-07: Completed order appears in user order history page", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   // The globalSetup seeds one order for the admin user.
   // We login as admin (who has a seeded order) and check the orders page.
   const { loginAsAdmin } = await import("./helpers/auth.js");

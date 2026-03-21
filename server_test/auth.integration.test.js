@@ -174,7 +174,9 @@ describe("GET /api/v1/auth/user-auth", () => {
   });
 
   it("AUTH-INT-08 returns 401 when no token is provided (bug fixed)", async () => {
+    jest.spyOn(console, "log").mockImplementation(() => { }); // Suppress expected log
     const res = await request(app).get("/api/v1/auth/user-auth");
+    
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
   });
@@ -231,7 +233,9 @@ describe("PUT /api/v1/auth/profile", () => {
     const res = await request(app)
       .put("/api/v1/auth/profile")
       .send({ name: "Ghost" });
-    expect(res.status).toBe(401);
+    jest.spyOn(console, "log").mockImplementation(() => { }); // Suppress expected log
+    
+      expect(res.status).toBe(401);
   });
 
   it("PROF-INT-03 rejects a new password shorter than 6 characters", async () => {

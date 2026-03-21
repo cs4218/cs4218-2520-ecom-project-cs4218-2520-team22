@@ -44,7 +44,7 @@ beforeEach(async () => {
 describe("Story 2.1 — Product CRUD Integration", () => {
   // PROD-INT-01
   test("PROD-INT-01: Create product with required fields persists in DB", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/create-product")
       .set("Authorization", adminToken)
@@ -67,7 +67,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-02
   test("PROD-INT-02: Create product — missing name returns validation error", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/create-product")
       .set("Authorization", adminToken)
@@ -82,7 +82,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-03
   test("PROD-INT-03: Create product — missing price returns validation error", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/create-product")
       .set("Authorization", adminToken)
@@ -100,7 +100,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
   // When using supertest .attach(), the file is actually sent.
   // We test this case with a Buffer > 1MB via the attach mechanism.
   test("PROD-INT-04: Create product with photo >1MB returns size error", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const bigBuffer = Buffer.alloc(1_100_000, "x"); // 1.1 MB
     const res = await request(app)
       .post("/api/v1/product/create-product")
@@ -121,7 +121,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
   // sends a response, so the request hangs. Using a non-admin (regular user)
   // token instead — requireSignIn passes but isAdmin returns 401.
   test("PROD-INT-05: Create product with non-admin token returns 401", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/create-product")
       .set("Authorization", userToken)
@@ -136,7 +136,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-06
   test("PROD-INT-06: Get all products returns max 12 sorted by createdAt desc", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     await createProduct(testCategory._id, { name: "Product A" });
     await createProduct(testCategory._id, { name: "Product B" });
     await createProduct(testCategory._id, { name: "Product C" });
@@ -156,7 +156,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-07
   test("PROD-INT-07: Get single product by slug returns product with populated category", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     await createProduct(testCategory._id, { name: "Red Shoes" });
 
     const res = await request(app).get("/api/v1/product/get-product/Red-Shoes");
@@ -170,7 +170,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-08
   test("PROD-INT-08: Get product with invalid slug returns null product", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app).get("/api/v1/product/get-product/no-such-slug");
 
     expect(res.status).toBe(200);
@@ -179,7 +179,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-09
   test("PROD-INT-09: Get product photo returns binary data with content-type header", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     // Seed a product with photo data directly via the model
     const photoBuffer = Buffer.from([0xff, 0xd8, 0xff]); // minimal JPEG header
     const product = await productModel.create({
@@ -202,7 +202,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-10
   test("PROD-INT-10: Update product fields persists changes in DB", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const product = await createProduct(testCategory._id, { name: "Old Name", price: 10 });
 
     const res = await request(app)
@@ -225,7 +225,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-11
   test("PROD-INT-11: Update product with non-admin token returns 401", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const product = await createProduct(testCategory._id, { name: "Locked Product" });
 
     const res = await request(app)
@@ -246,7 +246,7 @@ describe("Story 2.1 — Product CRUD Integration", () => {
 
   // PROD-INT-12
   test("PROD-INT-12: Delete product with admin token removes it from DB", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const product = await createProduct(testCategory._id, { name: "Disposable" });
 
     const res = await request(app)
@@ -264,9 +264,10 @@ describe("Story 2.1 — Product CRUD Integration", () => {
   // Bug fixed: DELETE /delete-product/:pid now requires requireSignIn + isAdmin.
   // Unauthenticated requests should receive 401.
   test("PROD-INT-13: Delete product without token returns 401 (auth middleware now present)", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const product = await createProduct(testCategory._id, { name: "Protected Product" });
 
+    jest.spyOn(console, "log").mockImplementation(() => { }); // Suppress expected log
     // No Authorization header sent
     const res = await request(app)
       .delete(`/api/v1/product/delete-product/${product._id}`);
@@ -293,7 +294,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // SRCH-INT-01
   test("SRCH-INT-01: Search by keyword matching product name", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app).get("/api/v1/product/search/Laptop");
 
     expect(res.status).toBe(200);
@@ -304,7 +305,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // SRCH-INT-02
   test("SRCH-INT-02: Search by keyword matching description", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     // "laptop" appears in the description of Wireless Mouse
     const res = await request(app).get("/api/v1/product/search/Ergonomic");
 
@@ -315,7 +316,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // SRCH-INT-03
   test("SRCH-INT-03: Search with no matches returns empty array", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app).get("/api/v1/product/search/xyznotfound99999");
 
     expect(res.status).toBe(200);
@@ -324,7 +325,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // SRCH-INT-04
   test("SRCH-INT-04: Search is case-insensitive", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const resUpper = await request(app).get("/api/v1/product/search/LAPTOP");
     const resLower = await request(app).get("/api/v1/product/search/laptop");
 
@@ -335,7 +336,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // FILT-INT-01
   test("FILT-INT-01: Filter by single category returns only products from that category", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/product-filters")
       .send({ checked: [testCategory._id.toString()], radio: [] });
@@ -350,7 +351,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // FILT-INT-02
   test("FILT-INT-02: Filter by price range returns only products within range", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/product-filters")
       .send({ checked: [], radio: [20, 50] });
@@ -364,7 +365,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // FILT-INT-03
   test("FILT-INT-03: Filter by category + price returns intersection", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/product-filters")
       .send({ checked: [testCategory._id.toString()], radio: [20, 50] });
@@ -378,7 +379,7 @@ describe("Story 2.2 — Product Search & Filter Integration", () => {
 
   // FILT-INT-04
   test("FILT-INT-04: Filter with no matches returns empty array", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app)
       .post("/api/v1/product/product-filters")
       .send({ checked: [], radio: [5000, 10000] });
@@ -401,7 +402,7 @@ describe("Story 2.3 — Product Pagination Integration", () => {
 
   // PAGE-INT-01
   test("PAGE-INT-01: Product count matches DB count", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app).get("/api/v1/product/product-count");
 
     expect(res.status).toBe(200);
@@ -411,7 +412,7 @@ describe("Story 2.3 — Product Pagination Integration", () => {
 
   // PAGE-INT-02
   test("PAGE-INT-02: Page 1 returns first 6 products", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const res = await request(app).get("/api/v1/product/product-list/1");
 
     expect(res.status).toBe(200);
@@ -421,7 +422,7 @@ describe("Story 2.3 — Product Pagination Integration", () => {
 
   // PAGE-INT-03
   test("PAGE-INT-03: Page 2 returns remaining 2 products (different from page 1)", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const page1 = await request(app).get("/api/v1/product/product-list/1");
     const page2 = await request(app).get("/api/v1/product/product-list/2");
 
@@ -436,7 +437,7 @@ describe("Story 2.3 — Product Pagination Integration", () => {
 
   // PAGE-INT-04
   test("PAGE-INT-04: Get products by category slug returns only products in that category", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     const otherCat = await createCategory({ name: "Books" });
     await createProduct(otherCat._id, { name: "Novel X" });
 
@@ -451,7 +452,7 @@ describe("Story 2.3 — Product Pagination Integration", () => {
 
   // PAGE-INT-05
   test("PAGE-INT-05: Get related products returns up to 3, same category, excluding given pid", async () => {
-    // Mark Wang, A0000000X
+    // Mark Wang, A0337880U
     // All 8 seeded products are in testCategory
     const allProducts = await productModel.find({ category: testCategory._id });
     const target = allProducts[0];

@@ -19,7 +19,7 @@ const SHIRT = `${E2E_PREFIX}Blue Shirt`;
 test("E2E-BROWSE-01: Home page displays seeded products with name, price, and description", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
 
   // At least the first E2E laptop should be visible in the product listing
@@ -34,7 +34,7 @@ test("E2E-BROWSE-01: Home page displays seeded products with name, price, and de
 test("E2E-BROWSE-02: Filter by E2E Electronics category shows only Electronics products", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Wait for categories to load and find the E2E Electronics checkbox
   await page.getByText(ELECTRONICS_CAT).first().click();
@@ -49,7 +49,7 @@ test("E2E-BROWSE-02: Filter by E2E Electronics category shows only Electronics p
 test("E2E-BROWSE-03: Filter by price range $0-$99 shows only cheap products", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Select the "$0 to 19" or first cheap price radio — the E2E shirt is $25
   // The Prices component defines ranges; we select "$20 to 39" to include the shirt
@@ -63,7 +63,7 @@ test("E2E-BROWSE-03: Filter by price range $0-$99 shows only cheap products", as
 
 // E2E-BROWSE-04
 test("E2E-BROWSE-04: Reset Filters button restores all products", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
 
   // Apply a category filter first
@@ -83,7 +83,7 @@ test("E2E-BROWSE-04: Reset Filters button restores all products", async ({ page 
 test("E2E-BROWSE-05: Load More button appends additional products to the list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   // 7 E2E products seeded (6 + 1); perPage = 6, so Load More reveals the 7th.
   // But there may be other products in the DB. We check that product count increases.
   await page.goto("/");
@@ -107,7 +107,7 @@ test("E2E-BROWSE-05: Load More button appends additional products to the list", 
 
 // E2E-BROWSE-06
 test("E2E-BROWSE-06: Search bar returns products matching the keyword", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // SearchInput component: placeholder="Search", submit button text="Search"
   await page.getByPlaceholder("Search").fill("E2E Laptop");
@@ -120,7 +120,7 @@ test("E2E-BROWSE-06: Search bar returns products matching the keyword", async ({
 
 // E2E-BROWSE-07
 test("E2E-BROWSE-07: Search with no matching keyword shows empty state", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   await page.getByPlaceholder("Search").fill("xyzproductnotexist99999");
   await page.getByRole("button", { name: "Search" }).click();
@@ -134,7 +134,7 @@ test("E2E-BROWSE-07: Search with no matching keyword shows empty state", async (
 test("E2E-BROWSE-08: Clicking More Details opens product details page with full info", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/");
   // Find the card for E2E Laptop 1 and click More Details
   const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP1 });

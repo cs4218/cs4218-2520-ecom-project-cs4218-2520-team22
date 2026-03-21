@@ -12,7 +12,7 @@ import { E2E_PREFIX } from "./helpers/globalSetup.js";
 
 // E2E-ADMIN-01
 test("E2E-ADMIN-01: Admin can access the admin dashboard", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin");
 
@@ -27,7 +27,7 @@ test("E2E-ADMIN-01: Admin can access the admin dashboard", async ({ page }) => {
 test("E2E-ADMIN-02: Non-admin user is blocked from admin routes and redirected", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsUser(page);
   await page.goto("/dashboard/admin");
 
@@ -43,7 +43,7 @@ test("E2E-ADMIN-02: Non-admin user is blocked from admin routes and redirected",
 test("E2E-ADMIN-03: Admin can create a new category and it appears in the list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/create-category");
 
@@ -60,7 +60,7 @@ test("E2E-ADMIN-03: Admin can create a new category and it appears in the list",
 test("E2E-ADMIN-04: Admin can create a new product and it is navigated to products list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/create-product");
 
@@ -86,7 +86,7 @@ test("E2E-ADMIN-04: Admin can create a new product and it is navigated to produc
 
 // E2E-ADMIN-05
 test("E2E-ADMIN-05: Admin can update an existing product", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   // Navigate to products list — each product card is a Link to the update page
   await page.goto("/dashboard/admin/products");
@@ -115,7 +115,7 @@ test("E2E-ADMIN-05: Admin can update an existing product", async ({ page }) => {
 test("E2E-ADMIN-06: Admin can delete a product and it is removed from the list", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/products");
 
@@ -141,7 +141,7 @@ test("E2E-ADMIN-06: Admin can delete a product and it is removed from the list",
 
 // E2E-ADMIN-07
 test("E2E-ADMIN-07: Admin can update order status from the orders page", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/orders");
 
@@ -164,7 +164,7 @@ test("E2E-ADMIN-07: Admin can update order status from the orders page", async (
 
 // E2E-ADMIN-08
 test("E2E-ADMIN-08: Admin can view all orders from all customers", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsAdmin(page);
   await page.goto("/dashboard/admin/orders");
 
