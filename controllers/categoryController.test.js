@@ -181,7 +181,7 @@ describe("createCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith(
             expect.objectContaining({
-                success: true,
+                success: false,
                 message: "Category Already Exists",
             })
         );
