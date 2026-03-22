@@ -124,7 +124,7 @@ test("E2E-PROFILE-03c: Updated profile data persists after logout and login", as
   await page.goto("/dashboard/user/profile");
 
   await expect(page.getByPlaceholder(/enter your name/i)).toHaveValue(updatedName);
-  await expect(page.getByPlaceholder(/enter your phone/i)).toHaveValue(UPDATED_PHONE);
+  await expect(page.getByPlaceholder(/enter your phone/i)).toHaveValue(updatedPhone);
   await expect(page.getByPlaceholder(/enter your address/i)).toHaveValue(updatedAddress);
 });
 

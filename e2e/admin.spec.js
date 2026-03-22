@@ -182,9 +182,7 @@ test("E2E-ADMIN-08: Admin can view all orders from all customers", async ({ page
   await page.goto("/dashboard/admin/orders");
 
   // The heading "All Orders" should be present
-  await expect(page.getByRole("heading", { name: "All Orders" })).toBeVis
-  
-  ible({ timeout: 10000 });
+  await expect(page.getByRole("heading", { name: "All Orders" })).toBeVisible({ timeout: 10000 });
 
   // At least the seeded test order should be listed
   // (the order contains E2E Blue Shirt)
