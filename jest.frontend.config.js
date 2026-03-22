@@ -23,6 +23,7 @@ export default {
   testMatch: [
     "<rootDir>/client/src/**/*.test.js",
     "<rootDir>/client/src/**/*.test.jsx",
+    "<rootDir>/client/tests/integration/**/*.test.js",
   ],
 
   // exclude _site directory (generated build files)
