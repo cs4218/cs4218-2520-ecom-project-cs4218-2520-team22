@@ -1,3 +1,4 @@
+// For backend integration tests
 export default {
   displayName: "integration",
   testEnvironment: "node",
