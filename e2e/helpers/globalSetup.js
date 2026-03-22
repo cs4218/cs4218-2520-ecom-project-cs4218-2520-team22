@@ -105,11 +105,11 @@ const setup = async () => {
   // ---- Seed categories ----
   const electronics = await Category.create({
     name: `${E2E_PREFIX}Electronics`,
-    slug: slugify(`${E2E_PREFIX}Electronics`),
+    slug: 'e2e-electronics',
   });
   const clothing = await Category.create({
     name: `${E2E_PREFIX}Clothing`,
-    slug: slugify(`${E2E_PREFIX}Clothing`),
+    slug: 'e2e-clothing',
   });
 
   // ---- Seed 7 products (6 Electronics for load-more pagination, 1 Clothing) ----
@@ -129,6 +129,16 @@ const setup = async () => {
     slug: slugify(`${E2E_PREFIX}Blue Shirt`),
     description: "E2E test blue cotton shirt for all occasions.",
     price: 25,
+    category: clothing._id,
+    quantity: 5,
+    shipping: true,
+  });
+
+  await Product.create({
+    name: `${E2E_PREFIX}Green Shirt`,
+    slug: slugify(`${E2E_PREFIX}Green Shirt`),
+    description: "E2E test green cotton shirt for all occasions.",
+    price: 1,
     category: clothing._id,
     quantity: 5,
     shipping: true,
