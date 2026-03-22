@@ -10,7 +10,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { loginAsUser } from "./helpers/auth.js";
+import { loginAsUser, E2E_USER_EMAIL, E2E_USER_PASSWORD } from "./helpers/auth.js";
 import { E2E_PREFIX } from "./helpers/globalSetup.js";
 
 const LAPTOP6 = `${E2E_PREFIX}Laptop 6`;
@@ -121,6 +121,39 @@ test("E2E-CART-05: Proceeding to checkout without login shows login prompt", asy
 
   // Clean up
   await page.evaluate(() => localStorage.removeItem("cart"));
+});
+
+// Decided that this file was more suited than auth.spec.js for this test
+// Since it is a cart → login → cart flow
+// added the test case, Daniel Lai, A0192327A
+test("E2E-CART-05b: Logging in from cart redirects back to cart with items intact", async ({
+  page,
+}) => {
+  // Cleanup: Ensure logged out and cart is empty
+  await page.goto("/");
+  await page.evaluate(() => {
+    localStorage.removeItem("auth");
+    localStorage.removeItem("cart");
+  });
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+
+  // Act: Add item to cart, click checkout/login, perform login
+  const laptopCard = page.locator(".card.m-2", { hasText: LAPTOP6 });
+  await expect(laptopCard).toBeVisible({ timeout: 8000 });
+  await laptopCard.getByRole("button", { name: "ADD TO CART" }).click();
+
+  await page.goto("/cart");
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 8000 });
+
+  await page.getByRole("button", { name: /please login to checkout/i }).click();
+  await page.waitForURL(/\/login/, { timeout: 8000 });
+
+  await loginAsUser(page);
+  await page.waitForURL(/\/cart/, { timeout: 10000 });
+  
+  await expect(page).toHaveURL(/\/cart/); // redirection back to cart is expected
+  await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 8000 });
 });
 
 // E2E-CART-06: Skipped — requires live Braintree sandbox
