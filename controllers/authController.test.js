@@ -330,7 +330,7 @@ describe("authController unit tests", () => {
         expect(mockOrderModel.findByIdAndUpdate).toHaveBeenCalledWith(
           ORDER_ID,
           { status: "Shipped" },
-          { new: true }
+          { new: true, runValidators: true }
         );
         expect(res.json).toHaveBeenCalledWith(updated);
       });

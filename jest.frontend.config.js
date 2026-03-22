@@ -14,16 +14,13 @@ export default {
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "identity-obj-proxy",
+    "^react$": "<rootDir>/client/node_modules/react",
+    "^react-dom$": "<rootDir>/client/node_modules/react-dom",
+    "^react-dom/(.*)$": "<rootDir>/client/node_modules/react-dom/$1",
   },
-
-  // // ignore all node_modules except styleMock (needed for css imports)
-  // transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
   testMatch: [
-    // Original
-    // "<rootDir>/client/src/pages/Auth/*.test.js",
-
     "<rootDir>/client/src/**/*.test.js",
     "<rootDir>/client/src/**/*.test.jsx",
     "<rootDir>/client/tests/integration/**/*.test.js",
@@ -31,12 +28,10 @@ export default {
 
   // exclude _site directory (generated build files)
   testPathIgnorePatterns: ["<rootDir>/client/src/_site/"],
+  
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: [
-    // Original
-    // "client/src/pages/Auth/**",
-
     "client/src/**/*.{js,jsx}",
     "!client/src/_site/**",
     "!client/src/**/*.test.{js,jsx}",
