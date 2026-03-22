@@ -15,6 +15,7 @@ export default {
     "<rootDir>/helpers/*.test.js",
     "<rootDir>/config/*.test.js",
     "<rootDir>/middlewares/*.test.js",
+    "<rootDir>/tests/integration/*.test.js",
   ],
 
   // jest code coverage
@@ -36,6 +37,9 @@ export default {
     "!**/*.test.jsx",
     "!**/__tests__/**",
     "!**/tests/**",
+    "!e2e/**",
+    "!server_test/**",
+    "!**/scripts/**",
   ],
   coverageThreshold: {
     global: {
