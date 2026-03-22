@@ -179,6 +179,11 @@ Run these commands from the project root:
   npm run test:ui
   ```
 
+- **AI-driven tests (In progress)**
+  ```bash
+  npm run test:ai
+  ```
+
 - **All tests**
 
    ```bash
@@ -213,12 +218,12 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 | MANSOOR SYED ALI | <ul><li>pages/ProductDetails.js</li><li>pages/CategoryProduct.js</li><li>pages/Contact.js</li><li>pages/Policy.js</li><li>components/Footer.js</li><li>components/Header.js</li><li>components/Layout.js</li><li>components/Spinner.js</li><li>pages/About.js</li><li>pages/Pagenotfound.js</li></ul> | <ul><li>controllers/productController.js<ul><li>getProductController</li><li>getSingleProductController</li><li>productPhotoController</li><li>productFiltersController</li><li>productCountController</li><li>productListController</li><li>searchProductController</li><li>relatedProductController</li><li>productCategoryController</li></ul></li><li>models/productModel.js</li><li>config/db.js</li></ul>
 | LIM JUN XIAN | <ul><li>pages/Homepage.js</li><li>context/cart.js</li><li>pages/CartPage.js</li><li>hooks/useCategory.js</li><li>pages/Categories.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>categoryController</li><li>singleCategoryController</li></ul><li>controllers/productController.js<ul><li>braintreeTokenController</li><li>brainTreePaymentController</li></ul><li>models/categoryModel.js</li>
 
-## Milestone 2
+### Milestone 2
 | Name | Integration Tests | UI Tests | Miscellaneous |
 | :---- | :---- | :---- | :---- |
 | LAI XIONG XING DANIEL | <ul><li>authHelper.integration.test</li><li>authMiddleware.integration.test</li><li>userModel.integration.test</li><li>authController.integration.test</li></ul> | <ul><li>profile.spec.js</li><li>admin.spec.js</li><li>auth.spec.js</li><li>cart-checkout.spec.js</li></ul> | <ul><li>AdminRoute.test</li><li>App.test</li><li>Minor edits of README setup instructions</li></ul>
 | WANG QINZHE | <ul><li>category.integration.test</li><li>order.integration.test</li><li>product.integration.test</li></ul> | <ul><li>admin.spec.js</li><li>auth.spec.js<li>browse.spec.js</li><li>cart-checkout.spec.js</li></ul> | <ul><li>e2e/helpers/auth.js</li><li>e2e/helpers/globalSetup.js</li><li>e2e/helpers/globalTeardown.js</li><li>server_test/helpers/auth.js</li><li>server_test/helpers/db.js</li><li>server_test/helpers/seed.js</li><li>server_test/helpers/testApp.js</li></ul>
-| SONG YICHAO | <ul><li>SearchFlow.integration.test.js</li><li>PrivateRoute.integration.test.js</li><li>Profile.integration.test.js</li><li>Orders.integration.test.js</li></ul> | <ul><li>user-flows.spec.js</li></ul> | <ul><li>Bug fix: Search.js (implemented navigation and add-to-cart handlers)</li><li>Updated unit and integration tests to include CartProvider and Router</li></ul> |
+| SONG YICHAO | <ul><li>SearchFlow.integration.test.js</li><li>PrivateRoute.integration.test.js</li><li>Profile.integration.test.js</li><li>Orders.integration.test.js</li></ul> | <ul><li>user-flows.spec.js</li></ul> | <ul><li>Bug fix: Search.js (implemented navigation and add-to-cart handlers)</li><li>Updated unit and integration tests to include CartProvider and Router</li><li>Implemented AI-assisted testing workflow (artifact parsing + report generation)</li></ul> |
 | MANSOOR SYED ALI | <ul><li>displayCategoryProducts.test</li><li>displayProductInfo.test</li><li>displayRelatedProductInfo.test</li></ul> | <ul><li>addCategoryProductToCart.test.js</li><li>addProductToCart.test.js</li><li>viewCategoryProductDetails.test.js</li></ul> | <ul>NIL</ul> |
 | LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js</li><li>updateUserAddress.spec.js</li></ul> | <ul><li>Bug fix: ProductDetails.js (added function to ADD TO CART button)</li></ul> |
 
