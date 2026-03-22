@@ -5,13 +5,14 @@
  */
 
 import {
+  E2E_USER_NAME,
   E2E_USER_EMAIL,
   E2E_USER_PASSWORD,
+  E2E_USER_PHONE,
+  E2E_USER_ADDRESS,
   E2E_ADMIN_EMAIL,
   E2E_ADMIN_PASSWORD,
 } from "./globalSetup.js";
-
-export { E2E_USER_EMAIL, E2E_USER_PASSWORD, E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD };
 
 /**
  * Navigate to /login, fill credentials, and wait for the redirect away from /login.
