@@ -39,6 +39,7 @@ export default {
     "!**/tests/**",
     "!e2e/**",
     "!server_test/**",
+    "!**/scripts/**",
   ],
   coverageThreshold: {
     global: {
