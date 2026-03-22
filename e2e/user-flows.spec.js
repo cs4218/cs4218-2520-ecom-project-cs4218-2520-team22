@@ -45,3 +45,24 @@ test("E2E-SONG-01: Login -> Dashboard -> Profile update -> refresh persists", as
   await expect(phoneInput).toHaveValue(newPhone);
   await expect(addressInput).toHaveValue(newAddress);
 });
+
+// Song Yichao, A0255686M
+test("E2E-SONG-02: Search -> results -> add to cart -> cart shows item", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByPlaceholder("Search").fill("E2E Laptop");
+  await page.getByRole("button", { name: "Search" }).click();
+
+  await page.waitForURL(/\/search/, { timeout: 8000 });
+
+  const firstCard = page.locator(".card.m-2").first();
+  await expect(firstCard).toBeVisible({ timeout: 8000 });
+
+  const productName = (await firstCard.locator(".card-title").textContent()).trim();
+
+  await firstCard.getByRole("button", { name: /add to cart/i }).click();
+
+  await page.goto("/cart");
+
+  await expect(page.getByText(productName)).toBeVisible({ timeout: 8000 });
+});
