@@ -209,13 +209,13 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 | LIM JUN XIAN | <ul><li>pages/Homepage.js</li><li>context/cart.js</li><li>pages/CartPage.js</li><li>hooks/useCategory.js</li><li>pages/Categories.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>categoryController</li><li>singleCategoryController</li></ul><li>controllers/productController.js<ul><li>braintreeTokenController</li><li>brainTreePaymentController</li></ul><li>models/categoryModel.js</li>
 
 ## Milestone 2
-| Name | Integration Tests | UI Tests | Miscellaneous 
-| :---- | :---- | :---- | :----
-| LAI XIONG XING DANIEL 
-| WANG QINZHE
-| SONG YICHAO
-| MANSOOR SYED ALI
-| LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js<li>updateUserAddress.spec.js</li></ul> | <ul>NIL</ul>
+| Name | Integration Tests | UI Tests | Miscellaneous |
+| :---- | :---- | :---- | :---- |
+| LAI XIONG XING DANIEL |
+| WANG QINZHE |
+| SONG YICHAO | <ul><li>SearchFlow.integration.test.js</li><li>PrivateRoute.integration.test.js</li><li>Profile.integration.test.js</li><li>Orders.integration.test.js</li></ul> | <ul><li>user-flows.spec.js</li></ul> | <ul><li>Bug fix: Search.js (implemented navigation and add-to-cart handlers)</li><li>Updated unit and integration tests to include CartProvider and Router</li></ul> |
+| MANSOOR SYED ALI |
+| LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js</li><li>updateUserAddress.spec.js</li></ul> | <ul>NIL</ul> |
 
 ## 7. CI Workflows
 
