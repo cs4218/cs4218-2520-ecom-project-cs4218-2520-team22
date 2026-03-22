@@ -18,7 +18,7 @@ import {
 
 // E2E-AUTH-01
 test("E2E-AUTH-01: Successful registration navigates to login page", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   const uniqueEmail = `e2e.reg${Date.now()}@test.com`;
 
   await page.goto("/register");
@@ -37,7 +37,7 @@ test("E2E-AUTH-01: Successful registration navigates to login page", async ({ pa
 
 // E2E-AUTH-02
 test("E2E-AUTH-02: Register with existing email shows error message", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/register");
   await page.getByPlaceholder("Enter Your Name").fill("Duplicate User");
   await page.getByPlaceholder("Enter Your Email").fill(E2E_USER_EMAIL); // already seeded
@@ -55,7 +55,7 @@ test("E2E-AUTH-02: Register with existing email shows error message", async ({ p
 
 // E2E-AUTH-03
 test("E2E-AUTH-03: Successful login shows user name in header", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsUser(page);
 
   // After login, the header shows the logged-in user's name
@@ -66,7 +66,7 @@ test("E2E-AUTH-03: Successful login shows user name in header", async ({ page })
 
 // E2E-AUTH-04
 test("E2E-AUTH-04: Login with wrong password shows error message", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await page.goto("/login");
   await page.getByPlaceholder("Enter Your Email").fill(E2E_USER_EMAIL);
   await page.getByPlaceholder("Enter Your Password").fill("WrongPassword!");
@@ -79,7 +79,7 @@ test("E2E-AUTH-04: Login with wrong password shows error message", async ({ page
 
 // E2E-AUTH-05
 test("E2E-AUTH-05: Logout redirects to home with Login link visible", async ({ page }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   await loginAsUser(page);
 
   // Open user dropdown and click Logout
@@ -96,7 +96,7 @@ test("E2E-AUTH-05: Logout redirects to home with Login link visible", async ({ p
 test("E2E-AUTH-06: Access protected /dashboard/user without login redirects away", async ({
   page,
 }) => {
-  // Mark Wang, A0000000X
+  // Mark Wang, A0337880U
   // PrivateRoute shows a 3-second countdown Spinner, then navigates to "/"
   await page.goto("/dashboard/user");
 
