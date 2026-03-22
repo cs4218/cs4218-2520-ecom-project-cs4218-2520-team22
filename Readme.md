@@ -174,6 +174,11 @@ Run these commands from the project root:
    npm run test:e2e
    ```
 
+- **Unit tests (Playwright)**
+  ```bash
+  npm run test:ui
+  ```
+
 - **All tests**
 
    ```bash
@@ -211,7 +216,7 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 ## Milestone 2
 | Name | Integration Tests | UI Tests | Miscellaneous |
 | :---- | :---- | :---- | :---- |
-| LAI XIONG XING DANIEL | <ul><li>authHelper.integration.test</li><li>authMiddleware.integration.test</li><li>userModel.integration.test</li><li>authController.integration.test</li></ul> | <ul><li>profile.spec.js</li></ul> | <ul><li>AdminRoute.test</li><li>App.test</li></ul>
+| LAI XIONG XING DANIEL | <ul><li>authHelper.integration.test</li><li>authMiddleware.integration.test</li><li>userModel.integration.test</li><li>authController.integration.test</li></ul> | <ul><li>profile.spec.js</li><li>admin.spec.js</li><li>auth.spec.js</li><li>cart-checkout.spec.js</li></ul> | <ul><li>AdminRoute.test</li><li>App.test</li><li>Minor edits of README setup instructions</li></ul>
 | WANG QINZHE | <ul><li>category.integration.test</li><li>order.integration.test</li><li>product.integration.test</li></ul> | <ul><li>admin.spec.js</li><li>auth.spec.js<li>browse.spec.js</li><li>cart-checkout.spec.js</li></ul> | <ul><li>e2e/helpers/auth.js</li><li>e2e/helpers/globalSetup.js</li><li>e2e/helpers/globalTeardown.js</li><li>server_test/helpers/auth.js</li><li>server_test/helpers/db.js</li><li>server_test/helpers/seed.js</li><li>server_test/helpers/testApp.js</li></ul>
 | SONG YICHAO | <ul><li>SearchFlow.integration.test.js</li><li>PrivateRoute.integration.test.js</li><li>Profile.integration.test.js</li><li>Orders.integration.test.js</li></ul> | <ul><li>user-flows.spec.js</li></ul> | <ul><li>Bug fix: Search.js (implemented navigation and add-to-cart handlers)</li><li>Updated unit and integration tests to include CartProvider and Router</li></ul> |
 | MANSOOR SYED ALI | <ul><li>displayCategoryProducts.test</li><li>displayProductInfo.test</li><li>displayRelatedProductInfo.test</li></ul> | <ul><li>addCategoryProductToCart.test.js</li><li>addProductToCart.test.js</li><li>viewCategoryProductDetails.test.js</li></ul> | <ul>NIL</ul> |
