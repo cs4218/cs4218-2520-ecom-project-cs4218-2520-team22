@@ -9,11 +9,12 @@
     "client": "npm start --prefix ./client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "sonarqube": "sonar-scanner",
-    "test": "npm run test:backend & npm run test:frontend & npm run test:integration & npm run test:e2e",
+    "test": "npm run test:backend & npm run test:frontend & npm run test:integration & npm run test:e2e & npm run test:ui",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
+    "test:ui": "npx playwright test client/tests/ui",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npx playwright test e2e"
   },
   "keywords": [],
   "author": "RP",
@@ -34,7 +35,8 @@
     "morgan": "^1.10.0",
     "nodemon": "^3.0.3",
     "react-icons": "^5.0.1",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "supertest": "^7.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.24.5",
