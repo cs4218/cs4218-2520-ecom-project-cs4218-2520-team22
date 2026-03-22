@@ -10,6 +10,8 @@ import { test, expect } from "@playwright/test";
 import {
   loginAs,
   loginAsUser,
+  registerAs,
+  resetPassword,
   E2E_USER_EMAIL,
   E2E_USER_PASSWORD,
   E2E_ADMIN_EMAIL,
@@ -108,4 +110,194 @@ test("E2E-AUTH-06: Access protected /dashboard/user without login redirects away
     timeout: 10000,
   });
   expect(page.url()).not.toContain("/dashboard/user");
+});
+
+/// Below tests are all added by Daniel Lai, A0192327A
+/// They are targeted towards different trofos todos when combined.
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-07: Login with nonexistent user fails", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByPlaceholder("Enter Your Email").fill("nonexistent@example.com");
+  await page.getByPlaceholder("Enter Your Password").fill("DoesntMatter123");
+
+  await page.getByRole("button", { name: "LOGIN" }).click();
+
+  // Error toast should appear and page stays on /login
+  await expect(page.getByText(/Something went wrong/i)).toBeVisible({ timeout: 8000 });
+  await expect(page).toHaveURL(/\/login/);
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-08: Register and then login successfully with the new account", async ({ page }) => {
+  const uniqueEmail = `e2e.reg.manual${Date.now()}@test.com`;
+  const password = "Test@1234";
+  await registerAs(page, {
+    name: "E2E Manual User",
+    email: uniqueEmail,
+    password,
+    phone: "9876543210",
+    address: "2 Test Street",
+    dob: "1999-05-20",
+    answer: "basketball",
+  });
+
+  await loginAs(page, uniqueEmail, password);
+  await page.waitForURL("/", { timeout: 10000 });
+
+  // Navigate to home page, user name should be in header,
+  // login/register links should be hidden since it is not needed anymore
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("navigation")).toContainText("E2E Manual User", { timeout: 8000 });
+  await expect(page.getByRole("link", { name: "Login" })).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Register" })).not.toBeVisible();
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-09a: Login persists after browser refresh", async ({ page }) => {
+  await loginAsUser(page);
+
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+
+  await expect(page.getByRole("navigation")).toContainText("E2E User", { timeout: 8000 });
+  await expect(page.getByRole("link", { name: "Login" })).not.toBeVisible();
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-09b: Clearing auth cache logs user out", async ({ page }) => {
+  await loginAsUser(page);
+  await page.waitForURL("/", { timeout: 10000 });
+
+  await page.evaluate(() => localStorage.removeItem("auth"));
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+
+  await expect(page.getByRole("link", { name: "Login" })).toBeVisible({ timeout: 8000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-10a: Forgot password with wrong answer shows error", async ({ page }) => {
+  const uniqueEmail = `e2e.forgot.wrong.${Date.now()}@test.com`;
+  const originalPassword = "Test@1234";
+  await registerAs(page, {
+    name: "E2E Forgot Wrong",
+    email: uniqueEmail,
+    password: originalPassword,
+    answer: "football",
+  });
+
+  await resetPassword(page, {
+    email: uniqueEmail,
+    answer: "chess",
+    newPassword: "NewPass@123",
+  });
+
+  // Failed reset should stay on forgot-password page (successful reset navigates to /login)
+  await expect(page.getByText("Something went wrong")).toBeVisible({ timeout: 8000 });
+  await expect(page).toHaveURL(/\/forgot-password/, { timeout: 8000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-10b: Wrong-answer reset does not invalidate old password", async ({ page }) => {
+  const uniqueEmail = `e2e.forgot.keepold.${Date.now()}@test.com`;
+  const originalPassword = "Test@1234";
+  await registerAs(page, {
+    name: "E2E Keep Old",
+    email: uniqueEmail,
+    password: originalPassword,
+    answer: "football",
+  });
+  await resetPassword(page, {
+    email: uniqueEmail,
+    answer: "wrong-answer",
+    newPassword: "NewPass@123",
+  });
+
+  await loginAs(page, uniqueEmail, originalPassword);
+  await page.waitForURL("/", { timeout: 10000 });
+
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("navigation")).toContainText("E2E Keep Old", { timeout: 8000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-11: Forgot password with nonexistent user fails", async ({
+  page,
+}) => {
+  await resetPassword(page, {
+    email: `e2e.missing.${Date.now()}@test.com`,
+    answer: "football",
+    newPassword: "NewPass@123",
+  });
+
+  await expect(page).toHaveURL(/\/forgot-password/, { timeout: 8000 });
+  await expect(page.getByRole("heading", { name: /reset password/i })).toBeVisible();
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-12a: Correct-answer reset navigates back to login", async ({ page }) => {
+  const uniqueEmail = `e2e.forgot.backlogin.${Date.now()}@test.com`;
+  const originalPassword = "Test@1234";
+  const newPassword = "NewPass@123";
+
+  await registerAs(page, {
+    name: "E2E Back Login",
+    email: uniqueEmail,
+    password: originalPassword,
+    answer: "football",
+  });
+
+  await resetPassword(page, {
+    email: uniqueEmail,
+    answer: "football",
+    newPassword,
+  });
+
+  await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-12b: Correct-answer reset allows login with new password", async ({ page }) => {
+  const uniqueEmail = `e2e.forgot.newok.${Date.now()}@test.com`;
+  const originalPassword = "Test@1234";
+  const newPassword = "NewPass@123";
+  await registerAs(page, {
+    name: "E2E New Password",
+    email: uniqueEmail,
+    password: originalPassword,
+    answer: "football",
+  });
+  await resetPassword(page, {
+    email: uniqueEmail,
+    answer: "football",
+    newPassword,
+  });
+
+  await loginAs(page, uniqueEmail, newPassword);
+
+  await expect(page.getByRole("navigation")).toContainText("E2E New Password", { timeout: 8000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-AUTH-12c: After successful password reset, old password fails to login", async ({ page }) => {
+  const uniqueEmail = `e2e.forgot.oldfail.${Date.now()}@test.com`;
+  const originalPassword = "Test@1234";
+  const newPassword = "NewPass@123";
+  await registerAs(page, {
+    name: "E2E Old Fail",
+    email: uniqueEmail,
+    password: originalPassword,
+    answer: "football",
+  });
+  await resetPassword(page, {
+    email: uniqueEmail,
+    answer: "football",
+    newPassword,
+  });
+
+  await loginAs(page, uniqueEmail, originalPassword);
+
+  await expect(page.getByText(/Invalid Password/i)).toBeVisible({ timeout: 8000 });
+  await expect(page).toHaveURL(/\/login/);
 });

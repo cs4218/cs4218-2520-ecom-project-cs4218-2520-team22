@@ -7,8 +7,9 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { loginAsAdmin, loginAsUser } from "./helpers/auth.js";
+import { loginAsAdmin, loginAsUser, E2E_ADMIN_EMAIL } from "./helpers/auth.js";
 import { E2E_PREFIX } from "./helpers/globalSetup.js";
+import path from "path";
 
 // E2E-ADMIN-01
 test("E2E-ADMIN-01: Admin can access the admin dashboard", async ({ page }) => {
@@ -187,4 +188,113 @@ test("E2E-ADMIN-08: Admin can view all orders from all customers", async ({ page
   // At least the seeded test order should be listed
   // (the order contains E2E Blue Shirt)
   await expect(page.getByText(`${E2E_PREFIX}Blue Shirt`)).toBeVisible({ timeout: 8000 });
+});
+
+/// Below tests are all added by Daniel Lai, A0192327A
+// added the test case, Daniel Lai, A0192327A
+test("E2E-ADMIN-09: Admin can view their own details from dashboard page", async ({ page }) => {
+  await loginAsAdmin(page);
+  
+  await page.goto("/dashboard/admin");
+  
+  await expect(page.getByText(/Admin Name:/i)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(/Admin Email:/i)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(/Admin Contact:/i)).toBeVisible({ timeout: 8000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-ADMIN-10: Cannot submit product without selecting category", async ({ page }) => {
+  await loginAsAdmin(page);
+  await page.goto("/dashboard/admin/create-product");
+  const newProductName = `${E2E_PREFIX}NoCat ${Date.now()}`;
+  
+  await page.getByPlaceholder("write a name").fill(newProductName);
+  await page.getByPlaceholder("write a description").fill("Should fail because category is missing");
+  await page.getByPlaceholder("write a Price").fill("29");
+  await page.getByPlaceholder("write a quantity").fill("2");
+  await page.getByRole("button", { name: "CREATE PRODUCT" }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/admin\/create-product/, { timeout: 8000 });
+  await expect(page.getByRole("heading", { name: "Create Product" })).toBeVisible();
+});
+
+/// Note: Related testing has revealed a major bug:
+/// Deleting a category causes items with said category to no longer have any, which should not be possible (see Test 10)
+/// Practically speaking, this means it does not show up on admin to fix the error, nor are said items addable to cart.
+/// However, as UI testing bugs are technically not in scope for fixing, this will not be fixed but just noted here for now.
+// added the test case, Daniel Lai, A0192327A
+test("E2E-ADMIN-11: Deleted category no longer appears in create-product dropdown", async ({
+  page,
+}) => {
+  await loginAsAdmin(page);
+  await page.goto("/dashboard/admin/create-category");
+  const categoryName = `${E2E_PREFIX}TempCat ${Date.now()}`;
+  const createCategoryForm = page
+    .locator("form")
+    .filter({ has: page.getByPlaceholder("Enter new category") })
+    .first();
+  await createCategoryForm.getByPlaceholder("Enter new category").fill(categoryName);
+  await createCategoryForm.getByRole("button", { name: "Submit" }).click();
+
+  const categoryRow = page.locator("table tbody tr", { hasText: categoryName }).first();
+  await expect(categoryRow).toBeVisible({ timeout: 8000 });
+  await categoryRow.getByRole("button", { name: "Delete" }).click();
+  
+  await expect(
+    page.locator(".ant-select-item-option", { hasText: categoryName })
+  ).toHaveCount(0);
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-ADMIN-12a: Add product with normal image works and shows image preview", async ({ page }) => {
+  await loginAsAdmin(page);
+  await page.goto("/dashboard/admin/create-product");
+  const newProductName = `${E2E_PREFIX}ImgOK ${Date.now()}`;
+  const smallImagePath = path.join(process.cwd(), "e2e", "images", "small-image.jpg");
+
+  await page.locator(".ant-select").first().click();
+  await page
+    .locator(".ant-select-item-option", {
+      hasText: `${E2E_PREFIX}Electronics`,
+    })
+    .first()
+    .click();
+  await page.locator('input[aria-label="photo-input"]').setInputFiles(smallImagePath);
+  await expect(page.locator('img[alt="product_photo"]')).toBeVisible({ timeout: 5000 });
+  await page.getByPlaceholder("write a name").fill(newProductName);
+  await page.getByPlaceholder("write a description").fill("Product with small valid image");
+  await page.getByPlaceholder("write a Price").fill("49");
+  await page.getByPlaceholder("write a quantity").fill("5");
+  await page.getByRole("button", { name: "CREATE PRODUCT" }).click();
+  await page.waitForURL(/\/dashboard\/admin\/products/, { timeout: 10000 });
+  
+  const createdProductCardTitle = page.locator("a.product-link .card-title", {
+    hasText: newProductName,
+  });
+  await expect(createdProductCardTitle).toBeVisible({ timeout: 8000 });
+});
+
+// added the test case, Daniel Lai, A0192327A
+test("E2E-ADMIN-12b: Add product with too-big image fails", async ({ page }) => {
+  await loginAsAdmin(page);
+  await page.goto("/dashboard/admin/create-product");
+  const newProductName = `${E2E_PREFIX}ImgTooBig ${Date.now()}`;
+  const bigImagePath = path.join(process.cwd(), "e2e", "images", "too-big-image.jpg");
+
+  await page.locator(".ant-select").first().click();
+  await page
+    .locator(".ant-select-item-option", {
+      hasText: `${E2E_PREFIX}Electronics`,
+    })
+    .first()
+    .click();
+  await page.locator('input[aria-label="photo-input"]').setInputFiles(bigImagePath);
+  await page.getByPlaceholder("write a name").fill(newProductName);
+  await page.getByPlaceholder("write a description").fill("Product should fail due to oversized image");
+  await page.getByPlaceholder("write a Price").fill("59");
+  await page.getByPlaceholder("write a quantity").fill("5");
+  await page.getByRole("button", { name: "CREATE PRODUCT" }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/admin\/create-product/, { timeout: 8000 });
+  await expect(page.getByRole("heading", { name: "Create Product" })).toBeVisible();
 });

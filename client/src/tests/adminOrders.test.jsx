@@ -117,7 +117,7 @@ describe("AdminOrders", () => {
             data: [
                 {
                     _id: "o1",
-                    status: "Not Process",
+                    status: "Not Processed",
                     buyer: { name: "Alice" },
                     createAt: "2020-01-01T00:00:00.000Z",
                     payment: { success: true },
