@@ -56,8 +56,12 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+export const E2E_USER_NAME = "E2E User";
 export const E2E_USER_EMAIL = "e2e.user@test.com";
 export const E2E_USER_PASSWORD = "User@e2e123";
+export const E2E_USER_PHONE = "0000000002";
+export const E2E_USER_ADDRESS = "2 E2E User St, Test City";
+
 export const E2E_ADMIN_EMAIL = "e2e.admin@test.com";
 export const E2E_ADMIN_PASSWORD = "Admin@e2e123";
 export const E2E_PREFIX = "E2E ";

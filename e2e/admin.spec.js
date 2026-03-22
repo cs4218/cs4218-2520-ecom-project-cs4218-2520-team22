@@ -7,7 +7,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { loginAsAdmin, loginAsUser } from "./helpers/auth.js";
+import { loginAsAdmin, loginAsUser, E2E_ADMIN_EMAIL } from "./helpers/auth.js";
 import { E2E_PREFIX } from "./helpers/globalSetup.js";
 
 // E2E-ADMIN-01
@@ -182,9 +182,22 @@ test("E2E-ADMIN-08: Admin can view all orders from all customers", async ({ page
   await page.goto("/dashboard/admin/orders");
 
   // The heading "All Orders" should be present
-  await expect(page.getByRole("heading", { name: "All Orders" })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole("heading", { name: "All Orders" })).toBeVis
+  
+  ible({ timeout: 10000 });
 
   // At least the seeded test order should be listed
   // (the order contains E2E Blue Shirt)
   await expect(page.getByText(`${E2E_PREFIX}Blue Shirt`)).toBeVisible({ timeout: 8000 });
+});
+
+// 09: Admin can view their own details from home page
+test("E2E-ADMIN-09: Admin can view their own details from dashboard page", async ({ page }) => {
+  await loginAsAdmin(page);
+  
+  await page.goto("/dashboard/admin");
+  
+  await expect(page.getByText(/Admin Name:/i)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(/Admin Email:/i)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(/Admin Contact:/i)).toBeVisible({ timeout: 8000 });
 });
