@@ -9,10 +9,11 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import SearchInput from "../components/Form/SearchInput";
 import Search from "../pages/Search";
 import { SearchProvider } from "../context/search";
+import { CartProvider } from "../context/cart"; // NEW
 
 jest.mock("axios");
 
-// Keep Layout lightweight so Header/Footer don't introduce unrelated dependencies
+// Keep Layout lightweight
 jest.mock("../components/Layout", () => {
   return function LayoutMock({ children }) {
     return <div data-testid="layout">{children}</div>;
@@ -45,12 +46,14 @@ describe("Search integration flow", () => {
 
     render(
       <SearchProvider>
-        <MemoryRouter initialEntries={["/"]}>
-          <Routes>
-            <Route path="/" element={<SearchInput />} />
-            <Route path="/search" element={<Search />} />
-          </Routes>
-        </MemoryRouter>
+        <CartProvider>
+          <MemoryRouter initialEntries={["/"]}>
+            <Routes>
+              <Route path="/" element={<SearchInput />} />
+              <Route path="/search" element={<Search />} />
+            </Routes>
+          </MemoryRouter>
+        </CartProvider>
       </SearchProvider>
     );
 
@@ -76,12 +79,14 @@ describe("Search integration flow", () => {
 
     render(
       <SearchProvider>
-        <MemoryRouter initialEntries={["/"]}>
-          <Routes>
-            <Route path="/" element={<SearchInput />} />
-            <Route path="/search" element={<Search />} />
-          </Routes>
-        </MemoryRouter>
+        <CartProvider>
+          <MemoryRouter initialEntries={["/"]}>
+            <Routes>
+              <Route path="/" element={<SearchInput />} />
+              <Route path="/search" element={<Search />} />
+            </Routes>
+          </MemoryRouter>
+        </CartProvider>
       </SearchProvider>
     );
 

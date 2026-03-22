@@ -3,6 +3,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { MemoryRouter } from "react-router-dom";
 import Search from "./Search";
 
 // Mock Layout to isolate Search page
@@ -18,23 +19,32 @@ jest.mock("../context/search", () => ({
   useSearch: () => mockUseSearch(),
 }));
 
+// Mock useCart (NEW)
+jest.mock("../context/cart", () => ({
+  useCart: () => [[], jest.fn()],
+}));
+
 describe("Search page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  // add test case, Song Yichao, A0255686M
+  // Song Yichao, A0255686M
   it('shows "No Products Found" when results are empty', () => {
     mockUseSearch.mockReturnValue([{ keyword: "abc", results: [] }, jest.fn()]);
 
-    render(<Search />);
+    render(
+      <MemoryRouter>
+        <Search />
+      </MemoryRouter>
+    );
 
     expect(screen.getByTestId("layout")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /search results/i })).toBeInTheDocument();
     expect(screen.getByText("No Products Found")).toBeInTheDocument();
   });
 
-  // add test case, Song Yichao, A0255686M
+  // Song Yichao, A0255686M
   it("shows Found N when results exist and renders product cards", () => {
     mockUseSearch.mockReturnValue([
       {
@@ -57,26 +67,28 @@ describe("Search page", () => {
       jest.fn(),
     ]);
 
-    render(<Search />);
+    render(
+      <MemoryRouter>
+        <Search />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText("Found 2")).toBeInTheDocument();
 
-    // product names rendered
     expect(screen.getByText("iPhone")).toBeInTheDocument();
     expect(screen.getByText("Android")).toBeInTheDocument();
 
-    // buttons rendered (2 products -> 2 each)
     expect(screen.getAllByRole("button", { name: /more details/i })).toHaveLength(2);
     expect(screen.getAllByRole("button", { name: /add to cart/i })).toHaveLength(2);
 
-    // image alt text uses product name
     expect(screen.getByAltText("iPhone")).toBeInTheDocument();
     expect(screen.getByAltText("Android")).toBeInTheDocument();
   });
 
-  // add test case, Song Yichao, A0255686M
+  // Song Yichao, A0255686M
   it("renders truncated description with ellipsis", () => {
-    const longDesc = "123456789012345678901234567890ABCDEFGHIJ"; // length > 30
+    const longDesc = "123456789012345678901234567890ABCDEFGHIJ";
+
     mockUseSearch.mockReturnValue([
       {
         keyword: "x",
@@ -87,9 +99,12 @@ describe("Search page", () => {
       jest.fn(),
     ]);
 
-    render(<Search />);
+    render(
+      <MemoryRouter>
+        <Search />
+      </MemoryRouter>
+    );
 
-    // substring(0, 30) + "..."
     expect(screen.getByText(`${longDesc.substring(0, 30)}...`)).toBeInTheDocument();
   });
 });
