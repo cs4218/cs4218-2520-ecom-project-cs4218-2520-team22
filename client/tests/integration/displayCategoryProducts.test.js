@@ -1,3 +1,5 @@
+// MANSOOR Syed Ali A0337939J
+
 /**
  * Test interactions between CategoryProduct page and productCategoryController
  *
@@ -14,15 +16,12 @@ import CategoryProduct from "../../src/pages/CategoryProduct";
 
 const mockNavigate = jest.fn();
 
-jest.mock(
-  "axios",
-  () => ({
-    __esModule: true,
-    default: {
-      get: jest.fn(),
-    },
-  }),
-);
+jest.mock("axios", () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+  },
+}));
 
 jest.mock("../../../controllers/productController", () => ({
   __esModule: true,

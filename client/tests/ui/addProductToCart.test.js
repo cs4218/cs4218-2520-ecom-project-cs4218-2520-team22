@@ -1,3 +1,5 @@
+// MANSOOR Syed Ali A0337939J
+
 /**
  * User navigates to "/product/:slug"
  * Adds the product to cart
