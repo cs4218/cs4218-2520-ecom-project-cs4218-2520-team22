@@ -8,6 +8,7 @@ import {
   E2E_USER_ADDRESS,
 } from "./helpers/globalSetup.js";
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-01: Profile preloads seeded user information", async ({ page }) => {
   await loginAsUser(page);
   await page.waitForURL("/", { timeout: 10000 });
@@ -21,6 +22,7 @@ test("E2E-PROFILE-01: Profile preloads seeded user information", async ({ page }
   await expect(page.getByPlaceholder(/enter your address/i)).toHaveValue(E2E_USER_ADDRESS);
 });
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-02: Email field is not editable", async ({ page }) => {
   await loginAsUser(page);
   await page.waitForURL("/", { timeout: 10000 });
@@ -32,6 +34,7 @@ test("E2E-PROFILE-02: Email field is not editable", async ({ page }) => {
   await expect(emailInput).toHaveValue(E2E_USER_EMAIL);
 });
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-03a: User can update name/address/phone and sees updates on profile + header", async ({ page }) => {
   const uniqueEmail = `e2e.profile.03a.${Date.now()}@test.com`;
   const updatedName = `E2E Profile 03a ${Date.now()}`;
@@ -62,6 +65,7 @@ test("E2E-PROFILE-03a: User can update name/address/phone and sees updates on pr
   await expect(page.getByRole("navigation")).toContainText(updatedName, { timeout: 8000 });
 });
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-03b: Updated profile data persists on /dashboard/user", async ({ page }) => {
   const uniqueEmail = `e2e.profile.03b.${Date.now()}@test.com`;
   const updatedName = `E2E Profile 03b ${Date.now()}`;
@@ -90,6 +94,7 @@ test("E2E-PROFILE-03b: Updated profile data persists on /dashboard/user", async 
   await expect(page.getByText(`Address: ${updatedAddress}`)).toBeVisible();
 });
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-03c: Updated profile data persists after logout and login", async ({ page }) => {
   const uniqueEmail = `e2e.profile.03c.${Date.now()}@test.com`;
   const updatedName = `E2E Profile 03c ${Date.now()}`;
@@ -128,6 +133,7 @@ test("E2E-PROFILE-03c: Updated profile data persists after logout and login", as
   await expect(page.getByPlaceholder(/enter your address/i)).toHaveValue(updatedAddress);
 });
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-04a: Changing password works and persists after logout/login", async ({ page }) => {
   const uniqueEmail = `e2e.profile.04a.${Date.now()}@test.com`;
   const password = "Profile@123";
@@ -160,6 +166,7 @@ test("E2E-PROFILE-04a: Changing password works and persists after logout/login",
   await expect(page.getByRole("navigation")).toContainText(displayName, { timeout: 8000 });
 });
 
+// addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-04b: Old password fails after changing password", async ({ page }) => {
   const uniqueEmail = `e2e.profile.04b.${Date.now()}@test.com`;
   const password = "Profile@123";
