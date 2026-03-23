@@ -3,6 +3,8 @@ export default {
   displayName: "integration",
   testEnvironment: "node",
   testMatch: ["<rootDir>/**/*.integration.test.js"],
+  // Exclude frontend integration tests; they run with jest.frontend.config.js (jsdom)
+  testPathIgnorePatterns: ["<rootDir>/client/src/**"],
   // No coverage thresholds — integration tests are not source files
   collectCoverage: false,
   // Longer timeout for DB spin-up
