@@ -118,6 +118,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("allows registartion with the same name but different email", async () => {
       const registerReq = {
         body: {
@@ -157,6 +158,7 @@ describe("authController Integration Tests", () => {
   });
 
   describe("just loginController", () => {
+    // added test case, Daniel Lai, A0192327A
     it("fails to login with unregistered email", async () => {
       const loginReq = {
         body: {
@@ -179,6 +181,7 @@ describe("authController Integration Tests", () => {
   });
 
   describe("just forgotPasswordController", () => {
+    // added test case, Daniel Lai, A0192327A
     it("fails to reset password of user that doesn't exist", async () => {
       const forgotReq = {
         body: {
@@ -218,6 +221,7 @@ describe("authController Integration Tests", () => {
       await registerController(registerReq, registerRes);
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("registers then logs in successfully", async () => {
       const loginReq = {
         body: {
@@ -245,6 +249,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("registers then fails to login with wrong password", async () => {
       const loginReq = {
         body: {
@@ -265,6 +270,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("resets password successfully", async () => {
       const forgotReq = {
         body: {
@@ -286,6 +292,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("fails to reset password with wrong answer", async () => {
       const forgotReq = {
         body: {
@@ -307,6 +314,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("fails to reset password with wrong answer and then fails to login with new password", async () => {
       const forgotReq = {
         body: {
@@ -337,6 +345,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("fails to reset password with wrong answer and then logs in with old password", async () => {
       const forgotReq = {
         body: {
@@ -368,6 +377,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("resets password and allows login with the new password", async () => {
       const forgotReq = {
         body: {
@@ -399,6 +409,7 @@ describe("authController Integration Tests", () => {
       );
     });
 
+    // added test case, Daniel Lai, A0192327A
     it("resets password and does not allow login with the old password", async () => {
       const forgotReq = {
         body: {
