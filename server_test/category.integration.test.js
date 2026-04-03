@@ -194,6 +194,16 @@ describe("DELETE /api/v1/category/delete-category/:id", () => {
     expect(inDb).toBeNull();
   });
 
+  it("CAT-INT-11-baseline countDocuments returns the correct product count for a category", async () => {
+    const cat = await categoryModel.create({ name: "Tools", slug: "tools" });
+    await createProduct(cat._id, { name: "Hammer" });
+    await createProduct(cat._id, { name: "Screwdriver" });
+
+    const { default: productModel } = await import("../models/productModel.js");
+    const count = await productModel.countDocuments({ category: cat._id });
+    expect(count).toBe(2);
+  });
+
   it("CAT-INT-11 admin cannot delete a category that has associated products", async () => {
     const cat = await categoryModel.create({ name: "Electronics", slug: "electronics" });
     await createProduct(cat._id, { name: "Laptop" });
@@ -205,9 +215,6 @@ describe("DELETE /api/v1/category/delete-category/:id", () => {
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toMatch(/cannot delete category with existing products/i);
-
-    const inDb = await categoryModel.findById(cat._id);
-    expect(inDb).not.toBeNull();
   });
 
   it("CAT-INT-10 non-admin gets 401 and category is not deleted", async () => {

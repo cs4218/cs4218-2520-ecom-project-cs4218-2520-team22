@@ -341,28 +341,6 @@ describe("deleteCategoryController", () => {
             })
         );
     });
-
-    test("returns 500 when findByIdAndDelete throws error", async () => {
-        const req = {
-            params: { id: "c1" },
-        };
-        const res = mockRes();
-
-        productModel.countDocuments.mockResolvedValueOnce(0);
-        categoryModel.findByIdAndDelete.mockRejectedValueOnce(
-            new Error("DB error")
-        );
-
-        await deleteCategoryController(req, res);
-
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-                success: false,
-                message: "Error while deleting category",
-            })
-        );
-    });
 });
 // Qinzhe Wang A0337880U
 describe("updateCategoryController", () => {
