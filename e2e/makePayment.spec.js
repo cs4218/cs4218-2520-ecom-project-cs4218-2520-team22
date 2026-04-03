@@ -20,6 +20,9 @@ test("Make payment successfully for items added to cart", async({page}) => {
     await page.getByRole("textbox", { name: "Enter Your Email" }).fill("e2e.user@test.com"); // Use test account
     await page.getByRole("textbox", { name: "Enter Your Password" }).fill("User@e2e123");
     await page.getByRole("button", { name: "Login" }).click();
+    await page.waitForURL((url) => !url.toString().includes("/login"), {
+        timeout: 10000,
+    });
 
     // Navigate back to Cart Page
     await page.getByRole('link', { name: 'Cart' }).click();

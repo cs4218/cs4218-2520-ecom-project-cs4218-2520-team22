@@ -106,14 +106,16 @@ test("E2E-ADMIN-05: Admin can update an existing product", async ({ page }) => {
   const laptopLink = page.locator("a.product-link", { hasText: `${E2E_PREFIX}Laptop 2` });
   await expect(laptopLink).toBeVisible({ timeout: 10000 });
   await laptopLink.click();
-  await page.waitForTimeout(2000); // Wait for API call
 
   // Should navigate to the update product page
   await page.waitForURL(/\/dashboard\/admin\/product\//, { timeout: 8000 });
 
+  // Wait for the product data to load into the form before editing
+  const nameInput = page.getByPlaceholder("write a name");
+  await expect(nameInput).not.toHaveValue("", { timeout: 8000 });
+
   // Update the name
   const updatedName = `${E2E_PREFIX}Laptop 2 Updated`;
-  const nameInput = page.getByPlaceholder("write a name");
   await nameInput.clear();
   await nameInput.fill(updatedName);
   await page.getByRole("button", { name: "UPDATE PRODUCT" }).click();
@@ -170,10 +172,8 @@ test("E2E-ADMIN-07: Admin can update order status from the orders page", async (
     hasText: "Processing",
   }).first().click();
 
-  // Wait for the API call to complete (no navigation, just re-fetch)
-  await page.waitForTimeout(1500);
-  // The select should now reflect "Processing"
-  await expect(statusSelect).toContainText("Processing", { timeout: 5000 });
+  // Wait for the API call to complete and the select to reflect the new value
+  await expect(statusSelect).toContainText("Processing", { timeout: 8000 });
 });
 
 // E2E-ADMIN-08

@@ -21,16 +21,14 @@ test.beforeEach(async ({ context, page }) => {
         localStorage.clear();
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 });
 
 test.describe('Add product to cart succesfully while navigating from', () =>  {
     test('Home Page -> Product Details Page -> Cart Page', async ({ page }) => {
         // Filter products by category
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: ELECTRONICS }).click();
-        await page.waitForTimeout(1000);
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: CLOTHING }).click();
-        await page.waitForTimeout(1000);
 
         // Expect only relevant products to show
         await expect(page.getByRole('heading', { name: LAPTOP1 })).toBeVisible({ timeout: 5000 });
@@ -42,7 +40,6 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
 
         // Filter products by price
         await page.locator(".filters .ant-radio-wrapper", { hasText: '$0 to 19' }).click();
-        await page.waitForTimeout(1000);
 
         // Expect only products that fulfills filter are shown
         await expect(page.getByRole('heading', { name: GREENSHIRT })).toBeVisible({ timeout: 5000 });
@@ -50,7 +47,7 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
 
         // Go to product details page
         await page.getByRole('button', { name: 'More Details' }).first().click();
-        await page.waitForTimeout(2000);
+        await page.waitForURL(/\/product\//, { timeout: 8000 });
 
         // Add prodcut to cart
         await page.getByRole('button', { name: 'ADD TO CART' }).first().click();
@@ -66,11 +63,11 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
         // Navigate to Categories Page through Header
         await page.getByRole('link', { name: 'Categories' }).click();
         await page.getByRole('link', { name: 'All Categories' }).click();
-        await page.waitForTimeout(1000);
+        await page.waitForURL(/\/categories/, { timeout: 8000 });
 
         // Navigate to Category Product Page by clicking on a category
         await page.getByRole('link', { name: CLOTHING }).click();
-        await page.waitForTimeout(1000);
+        await page.waitForURL(/\/category\//, { timeout: 8000 });
 
         // Expect only relevant products to show
         await expect(page.getByRole('heading', { name: GREENSHIRT })).toBeVisible({ timeout: 5000 });
