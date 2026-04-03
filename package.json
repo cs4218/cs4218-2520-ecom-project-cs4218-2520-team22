@@ -14,6 +14,7 @@
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
     "test:ui": "npx playwright test client/tests/ui",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js --runInBand",
+    "test:health": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.health.config.js --runInBand",
     "test:e2e": "npx playwright test e2e",
     "test:ai": "npm test -- --coverage > jest-output.txt 2>&1 && node scripts/aiTestAgent.js"
   },
