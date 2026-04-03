@@ -1,4 +1,5 @@
 import categoryModel from "../models/categoryModel";
+import productModel from "../models/productModel";
 import {
     categoryController,
     createCategoryController,
@@ -18,6 +19,10 @@ jest.mock("../models/categoryModel", () => {
     ctor.findByIdAndUpdate = jest.fn();
     return ctor;
 });
+
+jest.mock("../models/productModel", () => ({
+    countDocuments: jest.fn(),
+}));
 
 function mockRes() {
     const res = {};
@@ -256,6 +261,7 @@ describe("deleteCategoryController", () => {
         };
         const res = mockRes();
 
+        productModel.countDocuments.mockResolvedValueOnce(0);
         categoryModel.findByIdAndDelete.mockResolvedValueOnce({
             _id: "c1",
             name: "Electronics",
@@ -263,6 +269,7 @@ describe("deleteCategoryController", () => {
 
         await deleteCategoryController(req, res);
 
+        expect(productModel.countDocuments).toHaveBeenCalledWith({ category: "c1" });
         expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith("c1");
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith(
@@ -273,12 +280,34 @@ describe("deleteCategoryController", () => {
         );
     });
 
+    test("returns 400 when category has existing products", async () => {
+        const req = {
+            params: { id: "c1" },
+        };
+        const res = mockRes();
+
+        productModel.countDocuments.mockResolvedValueOnce(3);
+
+        await deleteCategoryController(req, res);
+
+        expect(productModel.countDocuments).toHaveBeenCalledWith({ category: "c1" });
+        expect(categoryModel.findByIdAndDelete).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: expect.stringMatching(/cannot delete category with existing products/i),
+            })
+        );
+    });
+
     test("returns 200 even if category does not exist (current behavior)", async () => {
         const req = {
             params: { id: "missing" },
         };
         const res = mockRes();
 
+        productModel.countDocuments.mockResolvedValueOnce(0);
         categoryModel.findByIdAndDelete.mockResolvedValueOnce(null);
 
         await deleteCategoryController(req, res);
@@ -298,6 +327,28 @@ describe("deleteCategoryController", () => {
         };
         const res = mockRes();
 
+        productModel.countDocuments.mockRejectedValueOnce(
+            new Error("DB error")
+        );
+
+        await deleteCategoryController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                message: "Error while deleting category",
+            })
+        );
+    });
+
+    test("returns 500 when findByIdAndDelete throws error", async () => {
+        const req = {
+            params: { id: "c1" },
+        };
+        const res = mockRes();
+
+        productModel.countDocuments.mockResolvedValueOnce(0);
         categoryModel.findByIdAndDelete.mockRejectedValueOnce(
             new Error("DB error")
         );

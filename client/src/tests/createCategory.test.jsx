@@ -157,4 +157,21 @@ describe("CreateCategory", () => {
 
         await waitFor(() => expect(axios.get).toHaveBeenCalledWith("/api/v1/category/get-category"));
     });
+
+    test("shows error toast when deletion is blocked due to existing products", async () => {
+        axios.get.mockResolvedValueOnce({
+            data: { success: true, category: [{ _id: "1", name: "Electronics" }] },
+        });
+
+        const errorMessage = "Cannot delete category with existing products. Please reassign or delete the products first.";
+        axios.delete.mockRejectedValueOnce({
+            response: { data: { success: false, message: errorMessage } },
+        });
+
+        render(<CreateCategory />);
+        expect(await screen.findByText("Electronics")).toBeInTheDocument();
+        fireEvent.click(screen.getByText("Delete"));
+        await waitFor(() => expect(axios.delete).toHaveBeenCalled());
+        await waitFor(() => expect(toast.error).toHaveBeenCalledWith(errorMessage));
+    });
 });
