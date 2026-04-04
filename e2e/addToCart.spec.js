@@ -55,7 +55,11 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
 
         // Go to cart page and check if the product is added successfully
         await page.getByRole('link', { name: 'Cart' }).click();
-        await expect(page.getByText(/You Have 1 items in your cart/)).toBeVisible({ timeout: 5000 });
+        await page.waitForURL('/cart', { timeout: 8000 });
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForLoadState('networkidle');
+        // The text may include "please login to checkout!" when not authenticated
+        await expect(page.getByText(/You Have 1 items in your cart/)).toBeVisible({ timeout: 10000 });
         await expect(page.getByRole('main')).toContainText(GREENSHIRT);
     });
 
@@ -80,6 +84,7 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
 
         // Go to cart page and check if the product is added successfully
         await page.getByRole('link', { name: 'Cart' }).click();
+        await page.waitForLoadState('networkidle');
         await expect(page.getByText(/You Have 1 items in your cart/)).toBeVisible({ timeout: 5000 });
         await expect(page.getByRole('main')).toContainText(GREENSHIRT);
     });

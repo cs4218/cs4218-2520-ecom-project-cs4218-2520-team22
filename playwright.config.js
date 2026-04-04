@@ -7,6 +7,7 @@ export default defineConfig({
   testDir: ".",
   timeout: 45000,
   retries: process.env.CI ? 1 : 0,
+  workers: 1,
   use: {
     baseURL: "http://localhost:3000",
     headless: true,
@@ -20,7 +21,7 @@ export default defineConfig({
   // If CI=true starts them automatically.
   webServer: [
     {
-      command: "node server.js",
+      command: "cross-env E2E_MODE=true node server.js",
       url: "http://localhost:6060",
       reuseExistingServer: !process.env.CI,
       timeout: 30000,

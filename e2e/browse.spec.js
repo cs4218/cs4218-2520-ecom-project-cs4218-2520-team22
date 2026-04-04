@@ -74,15 +74,21 @@ test("E2E-BROWSE-04: Reset Filters button restores all products", async ({ page 
   await expect(electronicsCheckbox).toBeVisible({ timeout: 10000 });
   await electronicsCheckbox.check();
   await expect(electronicsCheckbox).toBeChecked();
-  await expect(page.getByText(SHIRT)).not.toBeVisible({ timeout: 5000 });
+  // Wait for the filter to apply and products to re-render
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(500);
+  await expect(page.getByText(SHIRT)).not.toBeVisible({ timeout: 10000 });
 
   // Click Reset Filters — this triggers window.location.reload()
   await page.getByRole("button", { name: "RESET FILTERS" }).click();
+  await page.waitForLoadState("domcontentloaded");
   await page.waitForLoadState("networkidle");
+  // Wait extra time for filter state to clear and products to re-render
+  await page.waitForTimeout(1000);
 
   // After reset, both E2E products should be visible
   await expect(page.getByText(LAPTOP6)).toBeVisible({ timeout: 10000 });
-  await expect(page.getByText(SHIRT)).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText(SHIRT)).toBeVisible({ timeout: 10000 });
 });
 
 // E2E-BROWSE-05

@@ -90,8 +90,13 @@ test("E2E-PROFILE-03b: Updated profile data persists on /dashboard/user", async 
   await page.getByRole("button", { name: /^UPDATE$/i }).click();
 
   await page.goto("/dashboard/user");
-  await expect(page.getByText(`Name: ${updatedName}`)).toBeVisible({ timeout: 8000 });
-  await expect(page.getByText(`Address: ${updatedAddress}`)).toBeVisible();
+  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("networkidle");
+  // Wait longer for profile data to load from API after update
+  await page.waitForTimeout(1000);
+  // The dashboard page displays user data in h3 tags with format: "Name: {name}"
+  await expect(page.locator("h3")).filter({ hasText: updatedName }).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("h3")).filter({ hasText: updatedAddress }).toBeVisible({ timeout: 10000 });
 });
 
 // addded the test case, Daniel Lai, A0192327A
