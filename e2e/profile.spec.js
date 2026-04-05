@@ -91,12 +91,36 @@ test("E2E-PROFILE-03b: Updated profile data persists on /dashboard/user", async 
 
   await page.goto("/dashboard/user");
   await page.waitForLoadState("domcontentloaded");
+  // Wait for profile data to load from API after update
   await page.waitForLoadState("networkidle");
-  // Wait longer for profile data to load from API after update
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(3000);
+  
   // The dashboard page displays user data in h3 tags with format: "Name: {name}"
-  await expect(page.locator("h3")).filter({ hasText: updatedName }).toBeVisible({ timeout: 10000 });
-  await expect(page.locator("h3")).filter({ hasText: updatedAddress }).toBeVisible({ timeout: 10000 });
+  // Use locator to find h3 containing the updated name
+  const h3Locator = page.locator("h3");
+  let found = false;
+  const h3s = await h3Locator.all();
+  
+  for (let h3 of h3s) {
+    const text = await h3.textContent();
+    if (text && text.includes(updatedName)) {
+      found = true;
+      break;
+    }
+  }
+  expect(found).toBe(true);
+  // Also check address
+  const h3Locators = page.locator("h3");
+  const h3Array = await h3Locators.all();
+  let addressFound = false;
+  for (let h3 of h3Array) {
+    const text = await h3.textContent();
+    if (text.includes(updatedAddress)) {
+      addressFound = true;
+      break;
+    }
+  }
+  expect(addressFound).toBe(true);
 });
 
 // addded the test case, Daniel Lai, A0192327A

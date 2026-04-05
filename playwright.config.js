@@ -23,13 +23,13 @@ export default defineConfig({
     {
       command: "cross-env E2E_MODE=true node server.js",
       url: "http://localhost:6060",
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 30000,
     },
     {
-      command: "npx cross-env BROWSER=none npm run client",
+      command: "npm run client",
       url: "http://localhost:3000",
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120000,
     },
   ],

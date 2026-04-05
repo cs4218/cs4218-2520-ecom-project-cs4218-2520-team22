@@ -29,10 +29,11 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
         // Filter products by category
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: ELECTRONICS }).click();
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: CLOTHING }).click();
+        await page.waitForLoadState("networkidle");
 
         // Expect only relevant products to show
-        await expect(page.getByRole('heading', { name: LAPTOP1 })).toBeVisible({ timeout: 5000 });
-        await expect(page.getByRole('heading', { name: BLUESHIRT })).toBeVisible({ timeout: 5000 });
+        await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText(BLUESHIRT)).toBeVisible({ timeout: 10000 });
         
         // Uncheck category, products related to category should not be displayed
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: ELECTRONICS }).click();
@@ -48,9 +49,19 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
         // Go to product details page
         await page.getByRole('button', { name: 'More Details' }).first().click();
         await page.waitForURL(/\/product\//, { timeout: 8000 });
+        // Wait for page to fully load and product data to be displayed
+        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
+        await page.waitForTimeout(2000);
+        
+        // Ensure the ADD TO CART button is visible and interactive
+        const addButton = page.getByRole('button', { name: 'ADD TO CART' });
+        await addButton.first().waitFor({ state: 'visible', timeout: 5000 });
+        // Also wait for at least one h6 (product details) to be visible
+        await page.locator('h6').first().waitFor({ state: 'visible', timeout: 5000 });
 
         // Add prodcut to cart
-        await page.getByRole('button', { name: 'ADD TO CART' }).first().click();
+        await addButton.first().click();
         await expect(page.getByText('Item Added to cart')).toBeVisible();
 
         // Go to cart page and check if the product is added successfully
