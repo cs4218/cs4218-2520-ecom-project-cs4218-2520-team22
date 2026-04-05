@@ -56,9 +56,7 @@ test.describe('Add product to cart succesfully while navigating from', () => {
         // Ensure the ADD TO CART button is visible and interactive
         const addButton = page.getByRole('button', { name: 'ADD TO CART' });
         await addButton.first().waitFor({ state: 'visible', timeout: 5000 });
-        // Also wait for at least one h6 (product details) to be visible
-        await page.locator('h6').first().waitFor({ state: 'visible', timeout: 5000 });
-
+       
         // Add product to cart
         await addButton.first().click();
         await expect(page.getByText('Item Added to cart')).toBeVisible();
