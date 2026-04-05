@@ -24,7 +24,7 @@ test.beforeEach(async ({ context, page }) => {
     await page.waitForLoadState('networkidle');
 });
 
-test.describe('Add product to cart succesfully while navigating from', () =>  {
+test.describe('Add product to cart succesfully while navigating from', () => {
     test('Home Page -> Product Details Page -> Cart Page', async ({ page }) => {
         // Filter products by category
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: ELECTRONICS }).click();
@@ -32,9 +32,9 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
         await page.waitForLoadState("networkidle");
 
         // Expect only relevant products to show
-        await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 10000 });
-        await expect(page.getByText(BLUESHIRT)).toBeVisible({ timeout: 10000 });
-        
+        await expect(page.getByText(LAPTOP1)).toBeVisible({ timeout: 5000 });
+        await expect(page.getByText(BLUESHIRT)).toBeVisible({ timeout: 5000 });
+
         // Uncheck category, products related to category should not be displayed
         await page.locator(".filters .ant-checkbox-wrapper", { hasText: ELECTRONICS }).click();
         await expect(page.getByRole('heading', { name: LAPTOP1 })).not.toBeVisible({ timeout: 5000 });
@@ -52,22 +52,21 @@ test.describe('Add product to cart succesfully while navigating from', () =>  {
         // Wait for page to fully load and product data to be displayed
         await page.waitForLoadState("networkidle");
         await page.waitForLoadState("domcontentloaded");
-        await page.waitForTimeout(2000);
-        
+
         // Ensure the ADD TO CART button is visible and interactive
         const addButton = page.getByRole('button', { name: 'ADD TO CART' });
         await addButton.first().waitFor({ state: 'visible', timeout: 5000 });
         // Also wait for at least one h6 (product details) to be visible
         await page.locator('h6').first().waitFor({ state: 'visible', timeout: 5000 });
 
-        // Add prodcut to cart
+        // Add product to cart
         await addButton.first().click();
         await expect(page.getByText('Item Added to cart')).toBeVisible();
 
         // Go to cart page and check if the product is added successfully
         await page.getByRole('link', { name: 'Cart' }).click();
         await page.waitForURL('/cart', { timeout: 8000 });
-        await page.waitForLoadState('domcontentloaded');
+        await page.waitForLoadState("domcontentloaded");
         await page.waitForLoadState('networkidle');
         // The text may include "please login to checkout!" when not authenticated
         await expect(page.getByText(/You Have 1 items in your cart/)).toBeVisible({ timeout: 10000 });

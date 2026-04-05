@@ -88,40 +88,35 @@ test("E2E-PROFILE-03b: Updated profile data persists on /dashboard/user", async 
   await page.getByPlaceholder(/enter your name/i).fill(updatedName);
   await page.getByPlaceholder(/enter your address/i).fill(updatedAddress);
   await page.getByRole("button", { name: /^UPDATE$/i }).click();
-
+  
+  // Wait for success toast to appear
+  await expect(page.getByText(/Profile Updated Successfully/i)).toBeVisible({ timeout: 5000 });
+  
   await page.goto("/dashboard/user");
   await page.waitForLoadState("domcontentloaded");
   // Wait for profile data to load from API after update
   await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(3000);
-  
-  // The dashboard page displays user data in h3 tags with format: "Name: {name}"
-  // Use locator to find h3 containing the updated name
+    
+  // The dashboard page displays user data in separate h3 tags
+  // Check that both updated name and address are present in their respective h3s
   const h3Locator = page.locator("h3");
-  let found = false;
   const h3s = await h3Locator.all();
+  
+  let nameFound = false;
+  let addressFound = false;
   
   for (let h3 of h3s) {
     const text = await h3.textContent();
     if (text && text.includes(updatedName)) {
-      found = true;
-      break;
+      nameFound = true;
     }
-  }
-  expect(found).toBe(true);
-  // Also check address
-  const h3Locators = page.locator("h3");
-  const h3Array = await h3Locators.all();
-  let addressFound = false;
-  for (let h3 of h3Array) {
-    const text = await h3.textContent();
-    if (text.includes(updatedAddress)) {
+    if (text && text.includes(updatedAddress)) {
       addressFound = true;
-      break;
     }
   }
+  expect(nameFound).toBe(true);
   expect(addressFound).toBe(true);
-});
+  });
 
 // addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-03c: Updated profile data persists after logout and login", async ({ page }) => {
