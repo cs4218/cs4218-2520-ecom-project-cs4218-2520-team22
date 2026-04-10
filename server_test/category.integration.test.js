@@ -5,6 +5,7 @@ import { connect, disconnect, clearCollections } from "./helpers/db.js";
 import { createAdmin, createUser, tokenFor } from "./helpers/auth.js";
 import createApp from "./helpers/testApp.js";
 import categoryModel from "../models/categoryModel.js";
+import productModel from "../models/productModel.js";
 import { createProduct } from "./helpers/seed.js";
 
 const app = createApp();
@@ -199,7 +200,6 @@ describe("DELETE /api/v1/category/delete-category/:id", () => {
     await createProduct(cat._id, { name: "Hammer" });
     await createProduct(cat._id, { name: "Screwdriver" });
 
-    const { default: productModel } = await import("../models/productModel.js");
     const count = await productModel.countDocuments({ category: cat._id });
     expect(count).toBe(2);
   });
