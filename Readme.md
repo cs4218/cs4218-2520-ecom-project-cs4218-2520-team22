@@ -184,6 +184,16 @@ Run these commands from the project root:
   npm run test:ai
   ```
 
+- **Soak tests (k6)**
+  - for a quick 1-minute sanity test with ramp-up and ramp-down
+  ```bash
+  npm run nft:soak:quick
+  ```
+   - for a full 2hr soak test with 50 virtual users
+  ```
+  npm run nft:soak
+  ```
+
 - **All tests**
 
    ```bash
@@ -226,6 +236,15 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 | SONG YICHAO | <ul><li>SearchFlow.integration.test.js</li><li>PrivateRoute.integration.test.js</li><li>Profile.integration.test.js</li><li>Orders.integration.test.js</li></ul> | <ul><li>user-flows.spec.js</li></ul> | <ul><li>Bug fix: Search.js (implemented navigation and add-to-cart handlers)</li><li>Updated unit and integration tests to include CartProvider and Router</li><li>Implemented AI-assisted testing workflow (artifact parsing + report generation)</li></ul> |
 | MANSOOR SYED ALI | <ul><li>displayCategoryProducts.test</li><li>displayProductInfo.test</li><li>displayRelatedProductInfo.test</li></ul> | <ul><li>addCategoryProductToCart.test.js</li><li>addProductToCart.test.js</li><li>viewCategoryProductDetails.test.js</li></ul> | <ul>NIL</ul> |
 | LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js</li><li>updateUserAddress.spec.js</li></ul> | <ul><li>Bug fix: ProductDetails.js (added function to ADD TO CART button)</li></ul> |
+
+### Milestone 3
+| Name | Non-functional tests | Miscellaneous |
+| :---- | :---- | :---- |
+| LAI XIONG XING DANIEL |  |  | 
+| WANG QINZHE |  |  | 
+| SONG YICHAO |  |  | 
+| MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 
+| LIM JUN XIAN |  |  | 
 
 ## 7. CI Workflows
 
