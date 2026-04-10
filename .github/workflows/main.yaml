@@ -30,9 +30,20 @@ jobs:
         run: |
           cd client
           npm install
+
+      - name: Cache MongoDB binary for integration tests
+        uses: actions/cache@v4
+        with:
+          path: .cache/mongodb-binaries
+          key: ${{ runner.os }}-mongodb-memory-server-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-mongodb-memory-server-
       
       - name: Run backend tests
         run: npm run test:backend
 
       - name: Run frontend tests
         run: npm run test:frontend
+
+      - name: Run integration tests
+        run: npm run test:integration

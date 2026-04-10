@@ -19,6 +19,9 @@
     "test:e2e": "npx playwright test e2e",
     "test:ai": "npm test -- --coverage > jest-output.txt 2>&1 && node scripts/aiTestAgent.js"
   },
+  "mongodbMemoryServer": {
+    "downloadDir": ".cache/mongodb-binaries"
+  },
   "keywords": [],
   "author": "RP",
   "license": "ISC",
