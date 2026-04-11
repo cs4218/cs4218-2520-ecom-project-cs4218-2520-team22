@@ -16,6 +16,7 @@
     "nft:spike:cleanup": "node tests/spike/cleanup.js",
     "nft:spike:graphs": "python tests/spike/graphs.py",
     "test": "npm run test:backend & npm run test:integration & npm run test:e2e & npm run test:ui & npm run test:a11y",
+    "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
     "test:ui": "npx playwright test client/tests/ui",
     "test:a11y": "npx playwright test tests/a11y",
