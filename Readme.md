@@ -227,6 +227,15 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 | MANSOOR SYED ALI | <ul><li>displayCategoryProducts.test</li><li>displayProductInfo.test</li><li>displayRelatedProductInfo.test</li></ul> | <ul><li>addCategoryProductToCart.test.js</li><li>addProductToCart.test.js</li><li>viewCategoryProductDetails.test.js</li></ul> | <ul>NIL</ul> |
 | LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js</li><li>updateUserAddress.spec.js</li></ul> | <ul><li>Bug fix: ProductDetails.js (added function to ADD TO CART button)</li></ul> |
 
+### Milestone 3
+| Name | Non-functional tests | Miscellaneous |
+| :---- | :---- | :---- |
+| LAI XIONG XING DANIEL |  |  | 
+| WANG QINZHE |  |  | 
+| SONG YICHAO |  |  | 
+| MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 
+| LIM JUN XIAN | <ul><li>load_testing/PaymentLoadTesting.jmx</li><li>load_testing/ProfileMangementLoadTesting.jmx</li></ul> | <ul><li>testUsers.csv (user data for testing)</li><li>testUsers.json (user data to import for MongoDB)</li></ul> | 
+
 ## 7. CI Workflows
 
 ### MS1 CI URL
