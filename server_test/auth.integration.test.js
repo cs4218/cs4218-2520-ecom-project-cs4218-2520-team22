@@ -135,16 +135,19 @@ describe("POST /api/v1/auth/login", () => {
       .post("/api/v1/auth/login")
       .send({ email: validUser.email, password: "wrongpassword" });
 
+    // Generic message used to prevent user enumeration (security fix)
+    expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toMatch(/invalid password/i);
+    expect(res.body.message).toMatch(/invalid email or password/i);
   });
 
-  it("AUTH-INT-06 returns 404 for non-existent email", async () => {
+  it("AUTH-INT-06 returns 401 for non-existent email", async () => {
     const res = await request(app)
       .post("/api/v1/auth/login")
       .send({ email: "nobody@nowhere.com", password: "password123" });
 
-    expect(res.status).toBe(404);
+    // Normalised to 401 (was 404) to prevent user enumeration (security fix)
+    expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
   });
 
@@ -174,9 +177,7 @@ describe("GET /api/v1/auth/user-auth", () => {
   });
 
   it("AUTH-INT-08 returns 401 when no token is provided (bug fixed)", async () => {
-    jest.spyOn(console, "log").mockImplementation(() => { }); // Suppress expected log
     const res = await request(app).get("/api/v1/auth/user-auth");
-    
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
   });
@@ -233,9 +234,7 @@ describe("PUT /api/v1/auth/profile", () => {
     const res = await request(app)
       .put("/api/v1/auth/profile")
       .send({ name: "Ghost" });
-    jest.spyOn(console, "log").mockImplementation(() => { }); // Suppress expected log
-    
-      expect(res.status).toBe(401);
+    expect(res.status).toBe(401);
   });
 
   it("PROF-INT-03 rejects a new password shorter than 6 characters", async () => {

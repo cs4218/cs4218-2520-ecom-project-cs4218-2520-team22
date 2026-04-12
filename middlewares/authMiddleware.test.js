@@ -33,20 +33,24 @@ describe("Auth Middleware Component", () => {
     });
 
     // added the test case, Daniel Lai, A0192327A
-    it("should log error if token is invalid", async () => {
+    // updated to reflect 401 response on invalid token, Qinzhe Wang, A0337880U
+    it("should log error and return 401 if token is invalid", async () => {
       var testReq = {
         headers: {
           authorization: "invalid-token",
         },
         user: null,
       };
+      const testRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
       JWT.verify.mockImplementationOnce(() => {
         throw new Error("Invalid token");
       });
       jest.spyOn(console, 'log').mockImplementation(() => { });
-      const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
-      await requireSignIn(testReq, mockRes, mockNext);
+      await requireSignIn(testReq, testRes, mockNext);
       expect(JWT.verify).toHaveBeenCalledWith(
         "invalid-token",
         process.env.JWT_SECRET
@@ -54,7 +58,11 @@ describe("Auth Middleware Component", () => {
       expect(testReq.user).toBeNull();
       expect(mockNext).not.toHaveBeenCalled();
       expect(console.log).toHaveBeenCalled();
-      expect(mockRes.status).toHaveBeenCalledWith(401);
+      expect(testRes.status).toHaveBeenCalledWith(401);
+      expect(testRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Unauthorized",
+      });
     });
   });
 

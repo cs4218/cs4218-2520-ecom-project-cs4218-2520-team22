@@ -46,7 +46,7 @@ router.get("/get-product/:slug", getSingleProductController);
 //get photo
 router.get("/product-photo/:pid", productPhotoController);
 
-//delete product
+//delete product — requireSignIn + isAdmin added; previously unprotected (security fix)
 router.delete("/delete-product/:pid", requireSignIn, isAdmin, deleteProductController);
 
 //filter product
@@ -68,8 +68,8 @@ router.get("/related-product/:pid/:cid", relatedProductController);
 router.get("/product-category/:slug", productCategoryController);
 
 //payments routes
-//token
-router.get("/braintree/token", braintreeTokenController);
+//token — requireSignIn added to prevent unauthenticated token generation (OWASP A05)
+router.get("/braintree/token", requireSignIn, braintreeTokenController);
 
 //payments
 router.post("/braintree/payment", requireSignIn, brainTreePaymentController);
