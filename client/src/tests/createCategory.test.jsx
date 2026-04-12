@@ -47,26 +47,18 @@ describe("CreateCategory", () => {
         jest.clearAllMocks();
     });
 
-    // ── Rendering ─────────────────────────────────────────────────────────────
-
-    it("loads and displays categories on mount", async () => {
-        // Arrange
+    test("loads and displays categories on mount", async () => {
         axios.get.mockResolvedValueOnce({
             data: { success: true, category: [{ _id: "1", name: "Books" }] },
         });
 
-        // Act
         render(<CreateCategory />);
 
-        // Assert
         await waitFor(() => expect(axios.get).toHaveBeenCalledWith("/api/v1/category/get-category"));
         expect(await screen.findByText("Books")).toBeInTheDocument();
     });
 
-    // ── Create ────────────────────────────────────────────────────────────────
-
-    it("creates a new category and refreshes the list", async () => {
-        // Arrange
+    test("creates a new category and refreshes the list", async () => {
         axios.get
             .mockResolvedValueOnce({ data: { success: true, category: [] } })
             .mockResolvedValueOnce({ data: { success: true, category: [{ _id: "2", name: "Games" }] } });
@@ -75,13 +67,11 @@ describe("CreateCategory", () => {
         render(<CreateCategory />);
         await waitFor(() => expect(axios.get).toHaveBeenCalled());
 
-        // Act
         fireEvent.change(screen.getByLabelText("create-category-input"), {
             target: { value: "Games" },
         });
         fireEvent.click(screen.getByLabelText("create-category-input-submit"));
 
-        // Assert
         await waitFor(() =>
             expect(axios.post).toHaveBeenCalledWith("/api/v1/category/create-category", { name: "Games" })
         );
@@ -89,10 +79,7 @@ describe("CreateCategory", () => {
         expect(await screen.findByText("Games")).toBeInTheDocument();
     });
 
-    // ── Edit ──────────────────────────────────────────────────────────────────
-
-    it("opens edit modal, updates category, closes modal, and refreshes the list", async () => {
-        // Arrange
+    test("opens edit modal, updates category, closes modal, and refreshes the list", async () => {
         axios.get
             .mockResolvedValueOnce({ data: { success: true, category: [{ _id: "1", name: "Books" }] } })
             .mockResolvedValueOnce({ data: { success: true, category: [{ _id: "1", name: "Novels" }] } });
@@ -101,7 +88,6 @@ describe("CreateCategory", () => {
         render(<CreateCategory />);
         expect(await screen.findByText("Books")).toBeInTheDocument();
 
-        // Act
         fireEvent.click(screen.getByText("Edit"));
         expect(await screen.findByText("Modal")).toBeInTheDocument();
 
@@ -110,7 +96,6 @@ describe("CreateCategory", () => {
         fireEvent.change(input, { target: { value: "Novels" } });
         fireEvent.click(screen.getAllByText("Submit")[1]);
 
-        // Assert
         await waitFor(() =>
             expect(axios.put).toHaveBeenCalledWith(
                 "/api/v1/category/update-category/1",
@@ -122,10 +107,7 @@ describe("CreateCategory", () => {
         expect(await screen.findByText("Novels")).toBeInTheDocument();
     });
 
-    // ── Delete ────────────────────────────────────────────────────────────────
-
-    it("deletes a category and refreshes the list", async () => {
-        // Arrange
+    test("deletes a category and refreshes the list", async () => {
         axios.get
             .mockResolvedValueOnce({ data: { success: true, category: [{ _id: "1", name: "Books" }] } })
             .mockResolvedValueOnce({ data: { success: true, category: [] } });
@@ -134,17 +116,14 @@ describe("CreateCategory", () => {
         render(<CreateCategory />);
         expect(await screen.findByText("Books")).toBeInTheDocument();
 
-        // Act
         fireEvent.click(screen.getByText("Delete"));
 
-        // Assert
         await waitFor(() => expect(axios.delete).toHaveBeenCalled());
         await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Category deleted successfully"));
         await waitFor(() => expect(axios.get).toHaveBeenCalledWith("/api/v1/category/get-category"));
     });
 
-    it("shows a generic error toast and logs the error when deletion fails", async () => {
-        // Arrange
+    test("shows a generic error toast and logs the error when deletion fails", async () => {
         axios.get.mockResolvedValueOnce({
             data: { success: true, category: [{ _id: "1", name: "Electronics" }] },
         });
@@ -156,10 +135,8 @@ describe("CreateCategory", () => {
         render(<CreateCategory />);
         expect(await screen.findByText("Electronics")).toBeInTheDocument();
 
-        // Act
         fireEvent.click(screen.getByText("Delete"));
 
-        // Assert
         await waitFor(() => expect(axios.delete).toHaveBeenCalled());
         await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Something went wrong"));
         expect(console.log).toHaveBeenCalled();

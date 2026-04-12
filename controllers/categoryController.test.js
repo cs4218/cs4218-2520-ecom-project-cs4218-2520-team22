@@ -280,6 +280,7 @@ describe("deleteCategoryController", () => {
         );
     });
 
+    // added the test case, Daniel Lai, A0192327A
     test("returns 400 when category has existing products", async () => {
         const req = {
             params: { id: "c1" },

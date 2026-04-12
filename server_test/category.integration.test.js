@@ -195,6 +195,7 @@ describe("DELETE /api/v1/category/delete-category/:id", () => {
     expect(inDb).toBeNull();
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it("CAT-INT-11-baseline countDocuments returns the correct product count for a category", async () => {
     const cat = await categoryModel.create({ name: "Tools", slug: "tools" });
     await createProduct(cat._id, { name: "Hammer" });
@@ -204,6 +205,7 @@ describe("DELETE /api/v1/category/delete-category/:id", () => {
     expect(count).toBe(2);
   });
 
+  // added the test case, Daniel Lai, A0192327A
   it("CAT-INT-11 admin cannot delete a category that has associated products", async () => {
     const cat = await categoryModel.create({ name: "Electronics", slug: "electronics" });
     await createProduct(cat._id, { name: "Laptop" });

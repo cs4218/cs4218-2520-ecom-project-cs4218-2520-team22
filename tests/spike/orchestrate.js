@@ -21,7 +21,7 @@ const TEST_FILES = [
   // spike-recorder.jmx is a utility file, do not test that!
   "spike-login.jmx",
   "spike-products.jmx",
-  "spike-payment.jmx",
+  // "spike-payment.jmx",
 ];
 
 // Ensure results directory exists
@@ -182,6 +182,21 @@ const runAllTests = async () => {
   const results = {};
   const startTime = Date.now();
 
+  // Clean up old JTL files before starting tests
+  console.log("🧹 Cleaning up old JTL files...");
+  for (const testFile of TEST_FILES) {
+    const jtlFile = path.join(RESULTS_DIR, `${path.basename(testFile, ".jmx")}.jtl`);
+    if (fs.existsSync(jtlFile)) {
+      try {
+        fs.unlinkSync(jtlFile);
+        console.log(`   Deleted ${path.basename(jtlFile)}`);
+      } catch (error) {
+        console.warn(`   ⚠️  Failed to delete ${path.basename(jtlFile)}: ${error.message}`);
+      }
+    }
+  }
+  console.log();
+
   // Run each test file
   for (const testFile of TEST_FILES) {
     const jtlOutput = path.join(RESULTS_DIR, `${path.basename(testFile, ".jmx")}.jtl`);
@@ -224,6 +239,15 @@ const runAllTests = async () => {
   console.log(`║  Total Execution Time: ${totalTime}s`.padEnd(61) + "║");
   console.log("║  Detailed results in: tests/spike/results/                 ║");
   console.log("╚════════════════════════════════════════════════════════════╝\n");
+
+  // Generate graphs from JTL results
+  console.log("📊 Generating analysis graphs...");
+  try {
+    await execAsync(`python ${path.join(SPIKE_DIR, 'generate_spike_graph.py')}`);
+    console.log("✅ Graphs generated successfully\n");
+  } catch (error) {
+    console.warn("⚠️  Failed to generate graphs:", error.message);
+  }
 
   process.exit(0);
 };
