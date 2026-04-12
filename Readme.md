@@ -194,6 +194,12 @@ Run these commands from the project root:
   npm run nft:soak
   ```
 
+- **Stress tests (k6)**
+  > Note: Before running the stress test, set these environment variables for the target backend and test accounts: `BASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USER_EMAIL`, and `USER_PASSWORD`.
+  ```bash
+  npm run test:stress
+  ```
+
 - **All tests**
 
    ```bash
@@ -242,7 +248,7 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 | :---- | :---- | :---- |
 | LAI XIONG XING DANIEL |  |  | 
 | WANG QINZHE |  |  | 
-| SONG YICHAO |  |  | 
+| SONG YICHAO | <ul><li>stress.js</li></ul> | <ul><li>stress-summary.json</li><li>stress-output.txt</li><li>stress-raw.json</li><li>stress_latency_metrics.png</li></ul> | 
 | MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 
 | LIM JUN XIAN |  |  | 
 
@@ -251,4 +257,3 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 ### MS1 CI URL
 
 https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team22/actions/runs/22276067731/job/64438320117?pr=11 
-
