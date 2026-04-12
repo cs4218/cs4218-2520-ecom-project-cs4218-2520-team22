@@ -21,7 +21,8 @@
   
   /* Active Link */
   .navbar-nav .nav-link.active {
-    color: goldenrod; /* Set active link color */
+    color: #0a5f0f; /* Set active link color - darker green for better contrast */
+    font-weight: bold;
   }
   
   /* Dropdown Menu */
@@ -42,6 +43,19 @@
   /* Search Input */
   .search-input {
     margin-right: 10px; /* Add right margin */
+  }
+  
+  /* Search Button */
+  .btn-outline-success {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+  }
+  
+  .btn-outline-success:hover {
+    color: #fff;
+    background-color: #157347;
+    border-color: #157347;
   }
   
   /* Responsive Styling */

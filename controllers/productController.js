@@ -109,6 +109,7 @@ export const getSingleProductController = async (req, res) => {
 };
 
 // get photo
+// modified by Qinzhe Wang A0337880U
 export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
@@ -229,7 +230,6 @@ export const productCountController = async (req, res) => {
       total,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).send({
       message: "Error in product count",
       error,
@@ -254,7 +254,6 @@ export const productListController = async (req, res) => {
       products,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).send({
       success: false,
       message: "error in per page ctrl",

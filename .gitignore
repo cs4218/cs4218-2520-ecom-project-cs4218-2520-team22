@@ -19,6 +19,7 @@ logs/
 
 # Coverage
 coverage/
+.scannerwork/
 
 # Playwright
 playwright-report/
@@ -36,3 +37,7 @@ Thumbs.db
 *.tmp
 *.temp
 *.bak
+
+# Temporary AI-driven testing files
+ai-testing-report.md
+jest-output.txt

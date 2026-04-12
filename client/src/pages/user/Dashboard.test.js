@@ -48,9 +48,9 @@ describe("Dashboard", () => {
     expect(screen.getByTestId("layout")).toBeInTheDocument();
     expect(screen.getByTestId("user-menu")).toBeInTheDocument();
 
-    expect(screen.getByText("Alice Tan")).toBeInTheDocument();
-    expect(screen.getByText("alice@example.com")).toBeInTheDocument();
-    expect(screen.getByText("Singapore")).toBeInTheDocument();
+    expect(screen.getByText("Name: Alice Tan")).toBeInTheDocument();
+    expect(screen.getByText("Email: alice@example.com")).toBeInTheDocument();
+    expect(screen.getByText("Address: Singapore")).toBeInTheDocument();
   });
 
   // add test case, Song Yichao, A0255686M

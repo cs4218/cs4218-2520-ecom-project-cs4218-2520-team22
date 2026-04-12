@@ -22,7 +22,9 @@ const CartPage = () => {
     try {
       let total = 0;
       cart?.map((item) => {
-        total = total + item.price;
+        // Safely handle price - convert to number and handle NaN
+        const price = parseFloat(item.price) || 0;
+        total = total + price;
       });
       return total.toLocaleString("en-US", {
         style: "currency",
@@ -30,6 +32,7 @@ const CartPage = () => {
       });
     } catch (error) {
       console.log(error);
+      return "$0.00";
     }
   };
   //delete item
@@ -112,7 +115,7 @@ const CartPage = () => {
                   </div>
                   <div className="col-md-4">
                     <p>{p.name}</p>
-                    <p>{p.description.substring(0, 30)}</p>
+                    <p>{p.description ? p.description.substring(0, 30) : "N/A"}</p>
                     <p>Price: {p.price}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">

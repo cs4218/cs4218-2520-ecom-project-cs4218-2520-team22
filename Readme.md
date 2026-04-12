@@ -46,7 +46,7 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 
 3. **Configure Database Access**:
 
-   - Create a new user for your database (if not alredy done so) in MongoDB Atlas.
+   - Create a new user for your database (if not already done) in MongoDB Atlas.
    - Navigate to "Database Access" under "Security" and create a new user with the appropriate permissions.
 
 4. **Whitelist IP Address**:
@@ -62,7 +62,39 @@ Virtual Vault is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) e-co
 6. **Establish Connection with MongoDB Compass**:
    - Open MongoDB Compass on your local machine, paste the connection string (replace the necessary placeholders), and establish a connection to your cluster.
 
-### 3. Application Setup
+### 3. SonarQube Setup
+
+1. **Install JDK 21**
+
+   - Ensure your Java version is JDK 21 before starting SonarQube.
+
+2. **Install SonarQube Server (Community Edition)**
+
+   - Download and install SonarQube Community Edition from SonarSource.
+
+3. **Start SonarQube from zip installation guide**
+
+   - Follow the official guide:
+     https://docs.sonarsource.com/sonarqube-server/server-installation/from-zip-file/starting-stopping-server/from-zip-file
+
+4. **Open SonarQube in browser**
+
+   - Visit `http://localhost:9000`.
+
+5. **Create account and token**
+
+   - Create a SonarQube account.
+   - Generate a User Token, and add it to `sonar-project.properties`
+
+6. **Install Sonar scanner package**
+
+   - Run:
+
+     ```bash
+     npm install sonarqube-scanner@latest
+     ```
+
+### 4. Application Setup
 
 To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from GitHub, follow these general steps:
 
@@ -104,62 +136,179 @@ To download and use the MERN (MongoDB, Express.js, React.js, Node.js) app from G
    - Use `npm run dev` to run the app from root directory, which starts the development server.
    - Navigate to `http://localhost:3000` to access the application.
 
-## 5. Unit Testing with Jest
+## 5. Testing and Code Quality
 
-Unit testing is a crucial aspect of software development aimed at verifying the functionality of individual units or components of a software application. It involves isolating these units and subjecting them to various test scenarios to ensure their correctness.  
-Jest is a popular JavaScript testing framework widely used for unit testing. It offers a simple and efficient way to write and execute tests in JavaScript projects.
+This project uses multiple test layers:
 
-### Getting Started with Jest
+- **Frontend unit/component tests** with Jest + jsdom
+- **Backend unit/integration-style tests** with Jest + Node
+- **Server integration tests** with Jest + `supertest` + `mongodb-memory-server`
+- **End-to-end UI tests** with Playwright
+- **Accessibility tests** with Playwright + axe-core (WCAG AA compliance)
+- **Static analysis and coverage reporting** with SonarQube
 
-To begin unit testing with Jest in your project, follow these steps:
+### 5.1 Test Commands
 
-1. **Install Jest**:  
-   Use your preferred package manager to install Jest. For instance, with npm:
+Run these commands from the project root:
+
+- **Frontend tests**
 
    ```bash
-   npm install --save-dev jest
-
+   npm run test:frontend
    ```
 
-2. **Write Tests**  
-   Create test files for your components or units where you define test cases to evaluate their behaviour.
+- **Backend tests**
 
-3. **Run Tests**  
-   Execute your tests using Jest to ensure that your components meet the expected behaviour.  
-   You can run the tests by using the following command in the root of the directory:
+   ```bash
+   npm run test:backend
+   ```
 
-   - **Frontend tests**
+- **Integration tests (server_test)**
 
-     ```bash
-     npm run test:frontend
-     ```
+   ```bash
+   npm run test:integration
+   ```
 
-   - **Backend tests**
+- **Health check tests (endpoint verification)**
 
-     ```bash
-     npm run test:backend
-     ```
+   ```bash
+   npm run test:health
+   ```
 
-   - **All the tests**
-     ```bash
-     npm run test
-     ```
+- **E2E tests (Playwright)**
+
+   ```bash
+   npm run test:e2e
+   ```
+
+- **Unit tests (Playwright)**
+  ```bash
+  npm run test:ui
+  ```
+
+- **Accessibility tests (a11y - Playwright + axe-core)**
+  ```bash
+  npm run test:a11y
+  ```
+
+- **Spike tests (JMeter - load and performance testing)**
+  ```bash
+  npm run test:spike
+  ```
+
+- **AI-driven tests (In progress)**
+  ```bash
+  npm run test:ai
+  ```
+
+- **Soak tests (k6)**
+  - for a quick 1-minute sanity test with ramp-up and ramp-down
+  ```bash
+  npm run nft:soak:quick
+  ```
+   - for a full 2hr soak test with 50 virtual users
+  ```
+  npm run nft:soak
+  ```
+
+- **Stress tests (k6)**
+  > Note: Before running the stress test, set these environment variables for the target backend and test accounts: `BASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USER_EMAIL`, and `USER_PASSWORD`.
+  ```bash
+  npm run test:stress
+  ```
+
+- **All tests**
+
+   ```bash
+   npm run test
+   ```
+
+### 5.2 Jest Config Files
+
+- `jest.frontend.config.js`: frontend tests under `client/src/**/*.test.js(x)`
+- `jest.backend.config.js`: backend tests under root-level folders (`controllers`, `models`, `helpers`, `config`, `middlewares`)
+- `jest.integration.config.js`: integration tests under `server_test/**/*.integration.test.js`
+
+### 5.3 SonarQube Scan
+
+The Sonar scanner reads project settings from `sonar-project.properties`.
+
+1. Ensure SonarQube server is running (default: `http://localhost:9000`).
+2. Run scan:
+
+    ```bash
+   npm run sonarqube
+    ```
+
+### 5.4 Accessibility Testing Helper
+
+The `tests/a11y/a11y-helper.js` provides utilities for accessibility testing:
+- `checkAccessibility(page)` - Run axe-core scan and return violations
+- `expectNoAccessibilityViolations(page)` - Assert no violations found and fail test if any exist
+
+### 5.5 Spike/Performance Testing Setup (JMeter)
+
+Performance testing uses Apache JMeter to run load tests on the application. The spike tests are defined in `.jmx` files and use advanced threading models.
+
+#### Prerequisites
+
+1. **Install JMeter via Chocolatey** (Windows):
+   ```powershell
+   choco install jmeter
+   ```
+   
+   Or manually download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi)
+
+2. **Install JMeter Plugins Manager**:
+   - Download the JMeter Plugins Manager JAR from [jmeter-plugins.org](https://jmeter-plugins.org/)
+   - Place it in `%JMETER_HOME%\lib\ext\` directory
+   - Restart JMeter
+
+3. **Install Required Plugins**:
+   - Open JMeter GUI
+   - Go to **Options → Plugins Manager**
+   - Search for and install: **Custom Thread Groups** (provides "Ultimate Thread Group")
+   - Restart JMeter
+
+#### Running Spike Tests
+
+From project root, run:
+
+```bash
+npm run test:spike
+```
 
 
 ## 6. Project Contributions
-## Milestone 1
+### Milestone 1
 | Name | Client Related Files (/client/src/) | Server Related Files (./)
 | :---- | :---- | :----
 | LAI XIONG XING DANIEL | <ul><li>context/auth.js</li><li>pages/Auth/Register.js </li><li> pages/Auth/Login.js</li><li> pages/Auth/ForgotPassword.js</li>| <ul><li>helpers/authHelper.js</li><li>middlewares/authMiddleware.js</li><li>controllers/authController.js<ul><li>registerController</li><li>loginController</li><li>forgotPasswordController</li><li>testController</li>
 | WANG QINZHE | <ul><li>components/AdminMenu.js </li><li>pages/admin/AdminDashboard.js</li><li>components/Form/CategoryForm.js</li><li>pages/admin/UpdateProduct.js</li><li>pages/admin/CreateCategory.js</li><li>pages/admin/CreateProduct.js</li><li>pages/admin/AdminOrders.js</li><li>pages/admin/Products.js </li><li>pages/admin/Users.js</li></ul> | <ul><li>controllers/categoryController.js <ul><li>createCategoryController </li><li>updateCategoryController</li><li>deleteCategoryController</li></ul></li><li>controllers/productController.js <ul><li>createProductController </li><li>updateProductController</li><li>deleteProductController</li></ul></li></ul> 
 | SONG YICHAO | <ul><li>components/Routes/Private.js </li><li>components/UserMenu.js </li><li>pages/user/Dashboard.js</li><li>pages/user/Orders.js</li><li>pages/user/Profile.js</li><li>components/Form/SearchInput.js </li><li>pages/Search.js</li><li>context/search.js</li></ul> | <ul><li>models/userModel.js</li><li>models/orderModel.js</li><li>controllers/authController.js<ul><li>updateProfileController</li><li>getOrdersController</li><li>getAllOrdersController</li><li>orderStatusController</li></li><li>registerController</li><li>loginController</li><li>forgotPasswordController</li><li>testController</li></ul>
-| MANSOOR SYED ALI | <ul><li>pages/ProductDetails.js</li><li>pages/CategoryProduct.js</li><li>pages/Contact.js</li><li>pages/Policy.js</li><li>components/Footer.js</li><li>components/Header.js</li><li>components/Layout.js</li><li>components/Spinner.js</li><li>pages/About.js</li><li>pages/Pagenotfound.js</li></ul> | <ul><li>controllers/productController.js<ul><li>getProductController</li><li>getSingleProductController</li><li>productPhotoController</li><li>productFiltersController</li><li>productCountController</li><li>productListController</li><li>searchProductController</li><li>realtedProductController</li><li>productCategoryController</li></ul></li><li>models/productModel.js</li><li>config/db.js</li></ul>
+| MANSOOR SYED ALI | <ul><li>pages/ProductDetails.js</li><li>pages/CategoryProduct.js</li><li>pages/Contact.js</li><li>pages/Policy.js</li><li>components/Footer.js</li><li>components/Header.js</li><li>components/Layout.js</li><li>components/Spinner.js</li><li>pages/About.js</li><li>pages/Pagenotfound.js</li></ul> | <ul><li>controllers/productController.js<ul><li>getProductController</li><li>getSingleProductController</li><li>productPhotoController</li><li>productFiltersController</li><li>productCountController</li><li>productListController</li><li>searchProductController</li><li>relatedProductController</li><li>productCategoryController</li></ul></li><li>models/productModel.js</li><li>config/db.js</li></ul>
 | LIM JUN XIAN | <ul><li>pages/Homepage.js</li><li>context/cart.js</li><li>pages/CartPage.js</li><li>hooks/useCategory.js</li><li>pages/Categories.js</li></ul> | <ul><li>controllers/categoryController.js<ul><li>categoryController</li><li>singleCategoryController</li></ul><li>controllers/productController.js<ul><li>braintreeTokenController</li><li>brainTreePaymentController</li></ul><li>models/categoryModel.js</li>
 
+### Milestone 2
+| Name | Integration Tests | UI Tests | Miscellaneous |
+| :---- | :---- | :---- | :---- |
+| LAI XIONG XING DANIEL | <ul><li>authHelper.integration.test</li><li>authMiddleware.integration.test</li><li>userModel.integration.test</li><li>authController.integration.test</li></ul> | <ul><li>profile.spec.js</li><li>admin.spec.js</li><li>auth.spec.js</li><li>cart-checkout.spec.js</li></ul> | <ul><li>AdminRoute.test</li><li>App.test</li><li>Minor edits of README setup instructions</li></ul>
+| WANG QINZHE | <ul><li>category.integration.test</li><li>order.integration.test</li><li>product.integration.test</li></ul> | <ul><li>admin.spec.js</li><li>auth.spec.js<li>browse.spec.js</li><li>cart-checkout.spec.js</li></ul> | <ul><li>e2e/helpers/auth.js</li><li>e2e/helpers/globalSetup.js</li><li>e2e/helpers/globalTeardown.js</li><li>server_test/helpers/auth.js</li><li>server_test/helpers/db.js</li><li>server_test/helpers/seed.js</li><li>server_test/helpers/testApp.js</li></ul>
+| SONG YICHAO | <ul><li>SearchFlow.integration.test.js</li><li>PrivateRoute.integration.test.js</li><li>Profile.integration.test.js</li><li>Orders.integration.test.js</li></ul> | <ul><li>user-flows.spec.js</li></ul> | <ul><li>Bug fix: Search.js (implemented navigation and add-to-cart handlers)</li><li>Updated unit and integration tests to include CartProvider and Router</li><li>Implemented AI-assisted testing workflow (artifact parsing + report generation)</li></ul> |
+| MANSOOR SYED ALI | <ul><li>displayCategoryProducts.test</li><li>displayProductInfo.test</li><li>displayRelatedProductInfo.test</li></ul> | <ul><li>addCategoryProductToCart.test.js</li><li>addProductToCart.test.js</li><li>viewCategoryProductDetails.test.js</li></ul> | <ul>NIL</ul> |
+| LIM JUN XIAN | <ul><li>filterProducts.integration.test</li><li>getAllCategories.integration.test</li><li>getAllProducts.integration.test</li></ul> | <ul><li>addToCart.spec.js</li><li>makePayment.spec.js</li><li>updateUserAddress.spec.js</li></ul> | <ul><li>Bug fix: ProductDetails.js (added function to ADD TO CART button)</li></ul> |
 
-## 7. CI workflows
+### Milestone 3
+| Name | Non-functional tests | Miscellaneous |
+| :---- | :---- | :---- |
+| LAI XIONG XING DANIEL | <ul><li>Spike Testing</li></ul> | <ul><li>UI Accessibility Testing</li></ul><ul><li>Improved Playwright Test Consistency</li></ul><ul><li>Fix category deletion bug</li></ul><ul><li>Health check, periodic test runs, mutation testing</li></ul> | 
+| WANG QINZHE |  |  | 
+| SONG YICHAO | <ul><li>stress.js</li></ul> | <ul><li>stress-summary.json</li><li>stress-output.txt</li><li>stress-raw.json</li><li>stress_latency_metrics.png</li></ul> | 
+| MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 
+| LIM JUN XIAN |  |  | 
+
+## 7. CI Workflows
 
 ### MS1 CI URL
 
 https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team22/actions/runs/22276067731/job/64438320117?pr=11 
-

@@ -1,4 +1,5 @@
 import categoryModel from "../models/categoryModel.js";
+import productModel from "../models/productModel.js";
 import slugify from "slugify";
 export const createCategoryController = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ export const createCategoryController = async (req, res) => {
     const existingCategory = await categoryModel.findOne({ name });
     if (existingCategory) {
       return res.status(200).send({
-        success: true,
+        success: false,
         message: "Category Already Exists",
       });
     }
@@ -103,6 +104,13 @@ export const singleCategoryController = async (req, res) => {
 export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
+    const productCount = await productModel.countDocuments({ category: id });
+    if (productCount > 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Cannot delete category with existing products. Please reassign or delete the products first.",
+      });
+    }
     await categoryModel.findByIdAndDelete(id);
     res.status(200).send({
       success: true,

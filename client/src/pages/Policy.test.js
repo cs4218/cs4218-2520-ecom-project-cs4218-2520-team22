@@ -29,11 +29,15 @@ describe("Policy page", () => {
   });
 
   it("renders all privacy policy paragraphs", () => {
-    render(<Policy />);
+    const { container } = render(<Policy />);
 
-    const paragraphs = screen.getAllByText("add privacy policy");
+    expect(
+      screen.getByText(/We collect only the information needed to provide our services/i),
+    ).toBeInTheDocument();
 
-    expect(paragraphs.length).toBe(7);
+    const paragraphs = container.querySelectorAll(".col-md-4 p");
+
+    expect(paragraphs.length).toBe(2);
     paragraphs.forEach((p) => expect(p.tagName).toBe("P"));
   });
 });

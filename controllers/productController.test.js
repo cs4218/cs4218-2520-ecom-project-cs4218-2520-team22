@@ -1363,7 +1363,7 @@ describe("updateProductController", () => {
     expect(fs.readFileSync).not.toHaveBeenCalled();
   });
 
-  test("updates product without photo and returns 201", async () => {
+  test("updates product without photo and returns 200", async () => {
     const req = {
       params: { pid: "p1" },
       fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },
@@ -1408,7 +1408,7 @@ describe("updateProductController", () => {
     );
   });
 
-  test("updates product with photo, sets photo fields, and returns 201", async () => {
+  test("updates product with photo, sets photo fields, and returns 200", async () => {
     const req = {
       params: { pid: "p1" },
       fields: { name: "Phone", description: "d", price: 10, category: "c", quantity: 1, shipping: true },

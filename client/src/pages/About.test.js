@@ -31,6 +31,8 @@ describe("About page", () => {
   it("renders the about text", () => {
     render(<About />);
 
-    expect(screen.getByText(/Add text/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Virtual Vault is a student-built ecommerce platform/i),
+    ).toBeInTheDocument();
   });
 });
