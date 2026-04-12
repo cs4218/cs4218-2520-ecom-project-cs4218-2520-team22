@@ -144,6 +144,7 @@ This project uses multiple test layers:
 - **Backend unit/integration-style tests** with Jest + Node
 - **Server integration tests** with Jest + `supertest` + `mongodb-memory-server`
 - **End-to-end UI tests** with Playwright
+- **Accessibility tests** with Playwright + axe-core (WCAG AA compliance)
 - **Static analysis and coverage reporting** with SonarQube
 
 ### 5.1 Test Commands
@@ -177,6 +178,11 @@ Run these commands from the project root:
 - **Unit tests (Playwright)**
   ```bash
   npm run test:ui
+  ```
+
+- **Accessibility tests (a11y - Playwright + axe-core)**
+  ```bash
+  npm run test:a11y
   ```
 
 - **AI-driven tests (In progress)**
@@ -217,6 +223,12 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
    npm run sonarqube
     ```
 
+### 5.4 Accessibility Testing Helper
+
+The `tests/a11y/a11y-helper.js` provides utilities for accessibility testing:
+- `checkAccessibility(page)` - Run axe-core scan and return violations
+- `expectNoAccessibilityViolations(page)` - Assert no violations found and fail test if any exist
+
 
 ## 6. Project Contributions
 ### Milestone 1
@@ -240,7 +252,7 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 ### Milestone 3
 | Name | Non-functional tests | Miscellaneous |
 | :---- | :---- | :---- |
-| LAI XIONG XING DANIEL |  |  | 
+| LAI XIONG XING DANIEL | <ul><li>Spike Testing</li></ul> | <ul><li>UI Accessibility Testing</li></ul><ul><li>Improved Playwright Test Consistency</li></ul><ul><li>Fix category deletion bug</li></ul> | 
 | WANG QINZHE |  |  | 
 | SONG YICHAO |  |  | 
 | MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 
