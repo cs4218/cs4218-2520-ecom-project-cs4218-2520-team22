@@ -170,11 +170,11 @@ describe("authController Integration Tests", () => {
 
       await loginController(loginReq, loginRes);
 
-      expect(loginRes.status).toHaveBeenCalledWith(404);
+      expect(loginRes.status).toHaveBeenCalledWith(401);
       expect(loginRes.body).toEqual(
         expect.objectContaining({
           success: false,
-          message: "Email is not registered",
+          message: "Invalid email or password",
         })
       );
     });
@@ -261,11 +261,11 @@ describe("authController Integration Tests", () => {
 
       await loginController(loginReq, loginRes);
 
-      expect(loginRes.status).toHaveBeenCalledWith(200);
+      expect(loginRes.status).toHaveBeenCalledWith(401);
       expect(loginRes.body).toEqual(
         expect.objectContaining({
           success: false,
-          message: "Invalid Password",
+          message: "Invalid email or password",
         })
       );
     });
@@ -336,11 +336,11 @@ describe("authController Integration Tests", () => {
 
       await loginController(loginReq, loginRes);
 
-      expect(loginRes.status).toHaveBeenCalledWith(200);
+      expect(loginRes.status).toHaveBeenCalledWith(401);
       expect(loginRes.body).toEqual(
         expect.objectContaining({
           success: false,
-          message: "Invalid Password",
+          message: "Invalid email or password",
         })
       );
     });
@@ -431,11 +431,11 @@ describe("authController Integration Tests", () => {
 
       await loginController(oldLoginReq, oldLoginRes);
 
-      expect(oldLoginRes.status).toHaveBeenCalledWith(200);
+      expect(oldLoginRes.status).toHaveBeenCalledWith(401);
       expect(oldLoginRes.body).toEqual(
         expect.objectContaining({
           success: false,
-          message: "Invalid Password",
+          message: "Invalid email or password",
         })
       );
     });
