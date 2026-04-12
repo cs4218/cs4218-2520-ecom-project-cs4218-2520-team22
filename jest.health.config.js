@@ -3,7 +3,7 @@ export default {
   displayName: "health-check",
   testEnvironment: "node",
   testMatch: [
-    "<rootDir>/server_test/healthcheck.integration.test.js",
+    "<rootDir>/server_test/healthcheck.js",
   ],
   collectCoverage: false,
   testTimeout: 30000,
