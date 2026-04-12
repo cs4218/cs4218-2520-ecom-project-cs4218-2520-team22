@@ -38,24 +38,30 @@ def load_jtl_file(filepath):
         print(f"Error loading {filepath}: {e}")
         return None
 
-def process_jtl_data(data, time_bucket_seconds=5):
+def process_jtl_data(data, time_bucket_seconds=5, target_duration_sec=70):
     """
     Process JTL data and aggregate into time buckets.
+    Squeezes entire dataset into target_duration_sec window.
     Returns list of bucketed metrics.
     """
     if not data:
         return None
     
-    # Find minimum timestamp to normalize time
+    # Find minimum and maximum timestamps to normalize and scale
     min_timestamp = min(row['timestamp'] for row in data)
+    max_timestamp = max(row['timestamp'] for row in data)
+    actual_duration_sec = (max_timestamp - min_timestamp) / 1000.0
     
-    # Group by time bucket (after normalization)
+    # Group by time bucket (after normalization and scaling)
     buckets = defaultdict(lambda: {'times': [], 'successes': 0, 'failures': 0, 'threads': []})
     
     for row in data:
         # Normalize to relative time in seconds (from start of test)
-        relative_time_sec = (row['timestamp'] - min_timestamp) // 1000
-        bucket = (relative_time_sec // time_bucket_seconds) * time_bucket_seconds
+        relative_time_sec = (row['timestamp'] - min_timestamp) / 1000.0
+        
+        # Squeeze into target duration window
+        squeezed_time_sec = (relative_time_sec / actual_duration_sec) * target_duration_sec if actual_duration_sec > 0 else 0
+        bucket = (int(squeezed_time_sec) // time_bucket_seconds) * time_bucket_seconds
         
         buckets[bucket]['times'].append(row['elapsed'])
         buckets[bucket]['threads'].append(row['grpThreads'])
@@ -86,7 +92,7 @@ def process_jtl_data(data, time_bucket_seconds=5):
         
         results.append({
             'bucket': bucket,
-            'time_sec': bucket,  # Time in seconds (already relative)
+            'time_sec': bucket,  # Time in seconds (squeezed)
             'avg_response_time': avg_time,
             'p95_response_time': p95_time,
             'error_rate': error_rate,
@@ -105,18 +111,12 @@ def generate_graph(test_name, data, output_file):
     
     # Time is already normalized (relative from test start)
     times = [d['time_sec'] for d in data]
-    users = [d['concurrent_users'] for d in data]
     avg_resp = [d['avg_response_time'] for d in data]
     p95_resp = [d['p95_response_time'] for d in data]
     errors = [d['error_rate'] for d in data]
     
-    max_time = max(times) if times else 0
-    
     colors = {'spike-products': '#1f77b4', 'spike-payment': '#ff7f0e', 'spike-login': '#2ca02c'}
     color = colors.get(test_name, '#1f77b4')
-    
-    # Left axis: concurrent users (bar chart)
-    ax1.bar(times, users, alpha=0.3, label='Concurrent Users', color=color, width=1)
     
     # Left axis: avg response time (solid line)
     ax1.plot(times, avg_resp, marker='o', color=color, linewidth=2.5, 
@@ -127,9 +127,9 @@ def generate_graph(test_name, data, output_file):
             linestyle='--', label='P95 Response Time', markersize=4, alpha=0.8)
     
     ax1.set_xlabel('Time (seconds from start)', fontsize=12)
-    ax1.set_ylabel('Concurrent Users / Response Time (ms)', fontsize=12, color='black')
+    ax1.set_ylabel('Response Time (ms)', fontsize=12, color='black')
     ax1.tick_params(axis='y', labelcolor='black')
-    ax1.set_xlim(0, max_time + 5)  # Add 5-second margin
+    ax1.set_xlim(0, 70)  # Tests run for 70 seconds
     ax1.grid(True, alpha=0.3)
     
     # Right axis: error rate
@@ -140,9 +140,8 @@ def generate_graph(test_name, data, output_file):
     ax2.set_ylabel('Error Rate (%)', fontsize=12, color='black')
     ax2.tick_params(axis='y', labelcolor='black')
     
-    # Title and legend with duration
-    duration_str = f"({max_time}s)"
-    plt.title(f'Spike Test: {test_name.replace("spike-", "").title()} {duration_str}', 
+    # Title and legend
+    plt.title(f'Spike Test: {test_name.replace("spike-", "").title()} (70s)', 
               fontsize=13, fontweight='bold')
     
     # Combine legends
@@ -152,7 +151,7 @@ def generate_graph(test_name, data, output_file):
     
     plt.tight_layout()
     plt.savefig(output_file, dpi=150, bbox_inches='tight')
-    print(f"  Graph saved to {output_file} (duration: {max_time}s)")
+    print(f"  Graph saved to {output_file}")
     plt.close()
 
 def main():

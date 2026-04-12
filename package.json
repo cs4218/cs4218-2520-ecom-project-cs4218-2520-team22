@@ -11,7 +11,6 @@
     "sonarqube": "sonar-scanner",
     "nft:soak": "k6 run --summary-export=tests/soak/soak-summary.json --out json=tests/soak/soak-results.ndjson tests/soak/soak.js",
     "nft:soak:quick": "k6 run -e RAMP_UP=10s -e SOAK_DURATION=1m -e RAMP_DOWN=10s --summary-export=tests/soak/quick/soak-summary.json --out json=tests/soak/quick/soak-results.ndjson tests/soak/soak.js",
-    "nft:spike:seed": "node tests/spike/seed.js",
     "nft:spike": "node tests/spike/orchestrate.js",
     "nft:spike:cleanup": "node tests/spike/cleanup.js",
     "test": "npm run test:backend & npm run test:integration & npm run test:e2e & npm run test:ui & npm run test:a11y",

@@ -1,7 +1,6 @@
 /**
  * Spike Test Orchestrator
- * Runs multiple JMeter spike tests sequentially with progress reporting.
- * Prerequisite: nft:spike:seed must be run beforehand (manually).
+ * Runs: seed → spike tests → cleanup sequentially with progress reporting.
  * Parses JTL results and displays statistics after each test.
  */
 
@@ -21,7 +20,7 @@ const TEST_FILES = [
   // spike-recorder.jmx is a utility file, do not test that!
   "spike-login.jmx",
   "spike-products.jmx",
-  // "spike-payment.jmx",
+  "spike-payment.jmx",
 ];
 
 // Ensure results directory exists
@@ -174,9 +173,22 @@ const runAllTests = async () => {
   console.log("\n╔════════════════════════════════════════════════════════════╗");
   console.log("║           🚀 SPIKE TEST ORCHESTRATOR STARTING             ║");
   console.log("╚════════════════════════════════════════════════════════════╝");
-  console.log("\n⏳ Prerequisites:");
+
+  // ====== PHASE 1: SEED ======
+  console.log("\n[PHASE 1] 🌱 Seeding spike test data...");
+  try {
+    const seedPath = path.join(SPIKE_DIR, 'seed.js');
+    await execAsync(`node "${seedPath}"`);
+    console.log("✅ Seed completed successfully\n");
+  } catch (error) {
+    console.error("❌ Seed failed:", error.message);
+    process.exit(1);
+  }
+
+  // ====== PHASE 2: RUN TESTS ======
+  console.log("[PHASE 2] 🔧 Running spike tests...\n");
+  console.log("⏳ Prerequisites:");
   console.log("   ✓ Ensure 'npm run dev' is running (server on :6060, client on :3000)");
-  console.log("   ✓ Ensure 'npm run nft:spike:seed' has been executed");
   console.log("   ✓ Ensure JMeter is installed and available in PATH\n");
 
   const results = {};
@@ -243,11 +255,27 @@ const runAllTests = async () => {
   // Generate graphs from JTL results
   console.log("📊 Generating analysis graphs...");
   try {
-    await execAsync(`python ${path.join(SPIKE_DIR, 'generate_spike_graph.py')}`);
+    const graphPath = path.join(SPIKE_DIR, 'generate_spike_graph.py');
+    await execAsync(`python "${graphPath}"`);
     console.log("✅ Graphs generated successfully\n");
   } catch (error) {
     console.warn("⚠️  Failed to generate graphs:", error.message);
   }
+
+  // ====== PHASE 3: CLEANUP ======
+  console.log("[PHASE 3] 🧹 Cleaning up spike test data...");
+  try {
+    const cleanupPath = path.join(SPIKE_DIR, 'cleanup.js');
+    await execAsync(`node "${cleanupPath}"`);
+    console.log("✅ Cleanup completed successfully\n");
+  } catch (error) {
+    console.error("❌ Cleanup failed:", error.message);
+    process.exit(1);
+  }
+
+  console.log("╔════════════════════════════════════════════════════════════╗");
+  console.log("║        ✨ SPIKE TEST ORCHESTRATION COMPLETE ✨             ║");
+  console.log("╚════════════════════════════════════════════════════════════╝\n");
 
   process.exit(0);
 };
