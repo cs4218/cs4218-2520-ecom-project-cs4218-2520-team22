@@ -305,7 +305,7 @@ npm run test:spike
 | WANG QINZHE |  |  | 
 | SONG YICHAO | <ul><li>stress.js</li></ul> | <ul><li>stress-summary.json</li><li>stress-output.txt</li><li>stress-raw.json</li><li>stress_latency_metrics.png</li></ul> | 
 | MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 
-| LIM JUN XIAN |  |  | 
+| LIM JUN XIAN | <ul><li>load_testing/PaymentLoadTesting.jmx</li><li>load_testing/ProfileMangementLoadTesting.jmx</li></ul> | <ul><li>testUsers.csv (user data for testing)</li><li>testUsers.json (user data to import for MongoDB)</li><li>results obtained from load testing used in report<ul><li>load_testing/payment_results</li><li>load_testing/profile_results</li></ul></li></ul> | 
 
 ## 7. CI Workflows
 
