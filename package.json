@@ -11,6 +11,7 @@
     "sonarqube": "sonar-scanner",
     "nft:soak": "k6 run --summary-export=tests/soak/soak-summary.json --out json=tests/soak/soak-results.ndjson tests/soak/soak.js",
     "nft:soak:quick": "k6 run -e RAMP_UP=10s -e SOAK_DURATION=1m -e RAMP_DOWN=10s --summary-export=tests/soak/quick/soak-summary.json --out json=tests/soak/quick/soak-results.ndjson tests/soak/soak.js",
+    "test:stress": "k6 run tests/stress/stress.js",
     "test": "npm run test:backend & npm run test:frontend & npm run test:integration & npm run test:e2e & npm run test:ui",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
