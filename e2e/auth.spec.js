@@ -6,7 +6,7 @@
  * QINZHE Wang, A0337880U
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, beforeAll } from "@playwright/test";
 import {
   loginAs,
   loginAsUser,
@@ -17,6 +17,41 @@ import {
   E2E_ADMIN_EMAIL,
   E2E_ADMIN_PASSWORD,
 } from "./helpers/auth.js";
+
+// Reset E2E user profile before auth tests run (in case it was modified by other test suites)
+beforeAll(async ({ browser }) => {
+  if (!browser) return; // Skip if no browser context available
+  
+  // Create a new context to make a request as the E2E user
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  
+  try {
+    // Login to get token for the profile update
+    const loginResponse = await page.request.post("http://localhost:6060/api/v1/auth/login", {
+      data: { email: E2E_USER_EMAIL, password: E2E_USER_PASSWORD }
+    });
+    
+    if (loginResponse.ok()) {
+      const loginData = await loginResponse.json();
+      // Update profile back to original values
+      await page.request.put("http://localhost:6060/api/v1/auth/profile", {
+        headers: { Authorization: loginData.token },
+        data: {
+          name: "E2E User",
+          email: E2E_USER_EMAIL,
+          phone: "0000000002",
+          address: "2 E2E User St, Test City"
+        }
+      });
+      console.log("[AUTH-SETUP] Reset E2E user profile to original values");
+    }
+  } catch (error) {
+    console.log("[AUTH-SETUP] Warning: Could not reset E2E user profile:", error.message);
+  } finally {
+    await context.close();
+  }
+});
 
 // E2E-AUTH-01
 test("E2E-AUTH-01: Successful registration navigates to login page", async ({ page }) => {

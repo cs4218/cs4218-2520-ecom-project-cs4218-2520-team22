@@ -43,7 +43,10 @@ const ProductDetails = () => {
 
   const addItemToCart = (item) => {
     if (!item?._id) return;
-    const updatedCart = [...cart, item];
+    // Create cart item without photo buffer data
+    const { _id, name, price, description, slug, category } = item;
+    const cartItem = { _id, name, price, description, slug, category };
+    const updatedCart = [...cart, cartItem];
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     toast.success("Item Added to cart");
@@ -76,13 +79,17 @@ const ProductDetails = () => {
           <h6>Category : {product?.category?.name}</h6>
           <button className="btn btn-secondary ms-1" 
             onClick={() => {
-              setCart([...cart, product]);
-              localStorage.setItem(
-                "cart",
-                JSON.stringify([...cart, product]),
-              );
-              toast.success(product._id)
-              toast.success("Item Added to cart");
+              if (product?._id) {
+                // Create cart item without photo buffer data
+                const { _id, name, price, description, slug, category } = product;
+                const cartItem = { _id, name, price, description, slug, category };
+                setCart([...cart, cartItem]);
+                localStorage.setItem(
+                  "cart",
+                  JSON.stringify([...cart, cartItem]),
+                );
+                toast.success("Item Added to cart");
+              }
             }}>
               ADD TO CART
             </button>

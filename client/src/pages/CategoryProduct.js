@@ -67,10 +67,12 @@ const CategoryProduct = () => {
                       <button
                         className="btn btn-dark ms-1"
                         onClick={() => {
-                          setCart([...cart, p]);
+                          const { _id, name, price, description, slug, category } = p;
+                          const cartItem = { _id, name, price, description, slug, category };
+                          setCart([...cart, cartItem]);
                           localStorage.setItem(
                             "cart",
-                            JSON.stringify([...cart, p]),
+                            JSON.stringify([...cart, cartItem]),
                           );
                           toast.success("Item Added to cart");
                         }}

@@ -144,6 +144,7 @@ This project uses multiple test layers:
 - **Backend unit/integration-style tests** with Jest + Node
 - **Server integration tests** with Jest + `supertest` + `mongodb-memory-server`
 - **End-to-end UI tests** with Playwright
+- **Accessibility tests** with Playwright + axe-core (WCAG AA compliance)
 - **Static analysis and coverage reporting** with SonarQube
 
 ### 5.1 Test Commands
@@ -168,6 +169,12 @@ Run these commands from the project root:
    npm run test:integration
    ```
 
+- **Health check tests (endpoint verification)**
+
+   ```bash
+   npm run test:health
+   ```
+
 - **E2E tests (Playwright)**
 
    ```bash
@@ -177,6 +184,16 @@ Run these commands from the project root:
 - **Unit tests (Playwright)**
   ```bash
   npm run test:ui
+  ```
+
+- **Accessibility tests (a11y - Playwright + axe-core)**
+  ```bash
+  npm run test:a11y
+  ```
+
+- **Spike tests (JMeter - load and performance testing)**
+  ```bash
+  npm run test:spike
   ```
 
 - **AI-driven tests (In progress)**
@@ -223,6 +240,44 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
    npm run sonarqube
     ```
 
+### 5.4 Accessibility Testing Helper
+
+The `tests/a11y/a11y-helper.js` provides utilities for accessibility testing:
+- `checkAccessibility(page)` - Run axe-core scan and return violations
+- `expectNoAccessibilityViolations(page)` - Assert no violations found and fail test if any exist
+
+### 5.5 Spike/Performance Testing Setup (JMeter)
+
+Performance testing uses Apache JMeter to run load tests on the application. The spike tests are defined in `.jmx` files and use advanced threading models.
+
+#### Prerequisites
+
+1. **Install JMeter via Chocolatey** (Windows):
+   ```powershell
+   choco install jmeter
+   ```
+   
+   Or manually download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi)
+
+2. **Install JMeter Plugins Manager**:
+   - Download the JMeter Plugins Manager JAR from [jmeter-plugins.org](https://jmeter-plugins.org/)
+   - Place it in `%JMETER_HOME%\lib\ext\` directory
+   - Restart JMeter
+
+3. **Install Required Plugins**:
+   - Open JMeter GUI
+   - Go to **Options → Plugins Manager**
+   - Search for and install: **Custom Thread Groups** (provides "Ultimate Thread Group")
+   - Restart JMeter
+
+#### Running Spike Tests
+
+From project root, run:
+
+```bash
+npm run test:spike
+```
+
 
 ## 6. Project Contributions
 ### Milestone 1
@@ -246,7 +301,7 @@ The Sonar scanner reads project settings from `sonar-project.properties`.
 ### Milestone 3
 | Name | Non-functional tests | Miscellaneous |
 | :---- | :---- | :---- |
-| LAI XIONG XING DANIEL |  |  | 
+| LAI XIONG XING DANIEL | <ul><li>Spike Testing</li></ul> | <ul><li>UI Accessibility Testing</li></ul><ul><li>Improved Playwright Test Consistency</li></ul><ul><li>Fix category deletion bug</li></ul><ul><li>Health check, periodic test runs, mutation testing</li></ul> | 
 | WANG QINZHE |  |  | 
 | SONG YICHAO | <ul><li>stress.js</li></ul> | <ul><li>stress-summary.json</li><li>stress-output.txt</li><li>stress-raw.json</li><li>stress_latency_metrics.png</li></ul> | 
 | MANSOOR SYED ALI | <ul><li>soak.js</li></ul> | <ul><li>plot_http_req_waiting_p95.py</li></ul> | 

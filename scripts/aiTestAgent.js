@@ -3,34 +3,54 @@
 /**
  * aiTestAgent.js
  *
- * Minimal AI-driven testing artifact parser.
+ * AI-driven testing artifact parser with mutation testing support.
  *
  * What it does:
- * 1. Reads Jest output from a text file (optional)
- * 2. Reads coverage/coverage-summary.json
- * 3. Extracts failed tests, stack traces, and low-coverage files
- * 4. Generates ai-testing-report.md
+ * 1. Runs Stryker mutation testing (or reads an existing mutation report)
+ * 2. Checks mutation score against a configurable threshold (default: 90%)
+ * 3. Reads Jest output from a text file (optional)
+ * 4. Reads coverage/coverage-summary.json
+ * 5. Extracts failed tests, stack traces, low-coverage files, and survived mutants
+ * 6. Calls OpenAI API (if OPENAI_API_KEY is set) for AI-powered diagnostics
+ * 7. Generates ai-testing-report.md
+ * 8. Exits with code 1 if mutation score is below threshold
  *
  * Usage:
  *   node aiTestAgent.js
- *   node aiTestAgent.js --jest=jest-output.txt --coverage=coverage/coverage-summary.json --out=ai-testing-report.md
+ *   node aiTestAgent.js --jest=jest-output.txt --coverage=coverage/coverage-summary.json \
+ *     --mutation=reports/mutation/mutation.json --mutationThreshold=90 --out=ai-testing-report.md
+ *   node aiTestAgent.js --skipMutationRun  # skip running stryker, read existing report
  *
  * Suggested workflow:
  *   npm test -- --coverage > jest-output.txt 2>&1
  *   node aiTestAgent.js
+ *
+ * Environment variables:
+ *   OPENAI_API_KEY  - If set, the agent calls the OpenAI Chat API to generate
+ *                     targeted diagnostics for survived mutants.  This is justified
+ *                     because survived mutants encode precise information about which
+ *                     code logic is untested; an LLM can translate that into specific,
+ *                     actionable test-case suggestions far more effectively than
+ *                     static pattern matching.
  */
 
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
+const https = require("https");
 
 const DEFAULTS = {
   jest: "jest-output.txt",
   coverage: path.join("coverage", "coverage-summary.json"),
+  mutation: path.join("reports", "mutation", "mutation.json"),
   out: "ai-testing-report.md",
   branchThreshold: 80,
   lineThreshold: 80,
   functionThreshold: 80,
   statementThreshold: 80,
+  mutationThreshold: 90,
+  skipMutationRun: false,
+  openaiModel: "gpt-4o-mini",
 };
 
 function parseArgs(argv) {
@@ -39,11 +59,15 @@ function parseArgs(argv) {
   for (const arg of argv.slice(2)) {
     if (arg.startsWith("--jest=")) config.jest = arg.split("=")[1];
     else if (arg.startsWith("--coverage=")) config.coverage = arg.split("=")[1];
+    else if (arg.startsWith("--mutation=")) config.mutation = arg.split("=")[1];
     else if (arg.startsWith("--out=")) config.out = arg.split("=")[1];
     else if (arg.startsWith("--branchThreshold=")) config.branchThreshold = Number(arg.split("=")[1]);
     else if (arg.startsWith("--lineThreshold=")) config.lineThreshold = Number(arg.split("=")[1]);
     else if (arg.startsWith("--functionThreshold=")) config.functionThreshold = Number(arg.split("=")[1]);
     else if (arg.startsWith("--statementThreshold=")) config.statementThreshold = Number(arg.split("=")[1]);
+    else if (arg.startsWith("--mutationThreshold=")) config.mutationThreshold = Number(arg.split("=")[1]);
+    else if (arg === "--skipMutationRun") config.skipMutationRun = true;
+    else if (arg.startsWith("--openaiModel=")) config.openaiModel = arg.split("=")[1];
   }
 
   return config;
@@ -245,7 +269,8 @@ function parseCoverage(coverageJson, thresholds) {
   };
 }
 
-function guessRecommendations({ failingTests, lowCoverageFiles }) {
+function guessRecommendations({ failingTests, lowCoverageFiles, mutationData, mutationThreshold }) {
+  const threshold = mutationThreshold ?? DEFAULTS.mutationThreshold;
   const recs = [];
 
   if (failingTests.length > 0) {
@@ -281,19 +306,317 @@ function guessRecommendations({ failingTests, lowCoverageFiles }) {
     );
   }
 
-  if (lowCoverageFiles.length === 0 && failingTests.length === 0) {
+  if (mutationData && mutationData.score < threshold) {
+    recs.push(
+      `Mutation score is ${mutationData.score.toFixed(2)}% (below the ${threshold}% threshold). ` +
+      `${mutationData.survived} mutant(s) survived. Add tests that explicitly assert on boundary ` +
+      `values, operator variants (e.g. > vs >=), and logical inversions to eliminate surviving mutants.`
+    );
+  }
+
+  if (mutationData && mutationData.noCoverage > 0) {
+    recs.push(
+      `${mutationData.noCoverage} mutant(s) had no test coverage at all. ` +
+      `Ensure all source files are imported in at least one test suite.`
+    );
+  }
+
+  if (lowCoverageFiles.length === 0 && failingTests.length === 0 && (!mutationData || mutationData.score >= threshold)) {
     recs.push("No immediate issues detected from the provided artifacts.");
   }
 
   return recs;
 }
 
-function formatMarkdownReport({ config, jestData, coverageData }) {
+// ─── Mutation testing ────────────────────────────────────────────────────────
+
+/**
+ * Run Stryker mutation testing via the CLI and return its exit code.
+ * Stryker writes its JSON report to the path configured in stryker.config.mjs.
+ */
+function runStryker() {
+  console.log("[mutation] Running Stryker mutation testing…");
+  try {
+    execSync("npx stryker run", {
+      stdio: "inherit",
+      env: { ...process.env, FORCE_COLOR: "0" },
+    });
+    return 0;
+  } catch (err) {
+    // Stryker exits non-zero when break threshold is breached or on error.
+    // We handle the threshold check ourselves, so we tolerate non-zero here.
+    return err.status ?? 1;
+  }
+}
+
+/**
+ * Parse the Stryker JSON report and return structured mutation data.
+ * Stryker mutation.json schema (v8): { schemaVersion, projectRoot, files, testFiles, thresholds, config }
+ * Each file entry has a `mutants` array where each mutant has:
+ *   id, mutatorName, replacement, location, status (Killed|Survived|NoCoverage|Timeout|Ignored|CompileError)
+ */
+function parseMutationReport(mutationJsonPath) {
+  const json = safeReadJson(mutationJsonPath);
+  if (!json) {
+    return null;
+  }
+
+  const allMutants = [];
+
+  // Stryker v8 wraps mutants inside each file entry
+  const files = json.files || {};
+  for (const [filePath, fileData] of Object.entries(files)) {
+    for (const mutant of fileData.mutants || []) {
+      allMutants.push({
+        id: mutant.id,
+        file: normalizePath(filePath),
+        mutatorName: mutant.mutatorName,
+        replacement: mutant.replacement,
+        original: mutant.original,
+        location: mutant.location,
+        status: mutant.status,
+        statusReason: mutant.statusReason,
+        description: mutant.description,
+      });
+    }
+  }
+
+  const killed = allMutants.filter((m) => m.status === "Killed" || m.status === "Timeout").length;
+  const survived = allMutants.filter((m) => m.status === "Survived").length;
+  const noCoverage = allMutants.filter((m) => m.status === "NoCoverage").length;
+  const ignored = allMutants.filter((m) => m.status === "Ignored" || m.status === "CompileError").length;
+  const total = allMutants.length;
+  const tested = killed + survived + noCoverage;
+
+  // Mutation score = killed / (killed + survived + noCoverage) * 100
+  const score = tested > 0 ? (killed / tested) * 100 : 0;
+
+  const survivedMutants = allMutants.filter((m) => m.status === "Survived");
+  const noCoverageMutants = allMutants.filter((m) => m.status === "NoCoverage");
+
+  // Group survived mutants by file for easier reading
+  const survivedByFile = {};
+  for (const m of survivedMutants) {
+    if (!survivedByFile[m.file]) survivedByFile[m.file] = [];
+    survivedByFile[m.file].push(m);
+  }
+
+  return {
+    score,
+    total,
+    killed,
+    survived,
+    noCoverage,
+    ignored,
+    tested,
+    survivedMutants,
+    noCoverageMutants,
+    survivedByFile,
+    schemaVersion: json.schemaVersion,
+  };
+}
+
+// ─── OpenAI API integration ──────────────────────────────────────────────────
+
+/**
+ * Call the OpenAI Chat Completions API with a prompt about survived mutants.
+ *
+ * WHY AN EXTERNAL API?
+ * Survived mutants encode specific, fine-grained information about which code
+ * logic is not adequately tested (e.g. "the condition `x > 0` was mutated to
+ * `x >= 0` and no test caught the difference"). A static rule-based system
+ * cannot turn that information into specific, actionable test-case suggestions.
+ * An LLM, however, can reason about the semantic meaning of each mutation and
+ * suggest exactly which assertion or input value would catch it, making the
+ * diagnostic output substantially more useful to developers.
+ *
+ * @param {Array} survivedMutants - list of survived mutant objects
+ * @param {string} model - OpenAI model name
+ * @returns {Promise<string>} AI-generated diagnostic text
+ */
+async function callOpenAI(survivedMutants, model) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+
+  const sample = survivedMutants.slice(0, 30); // keep prompt manageable
+
+  const mutantDescriptions = sample
+    .map((m, i) => {
+      const loc = m.location
+        ? `${m.file}:${m.location.start?.line ?? "?"}`
+        : m.file;
+      return (
+        `${i + 1}. [${m.mutatorName}] ${loc}\n` +
+        `   Original : ${String(m.original ?? "").trim() || "(not available)"}\n` +
+        `   Mutant   : ${String(m.replacement ?? "").trim() || "(not available)"}`
+      );
+    })
+    .join("\n");
+
+  const prompt =
+    `You are a software-testing expert. The following ${sample.length} mutation(s) survived ` +
+    `(i.e. no test detected the code change). For each survived mutant, briefly explain ` +
+    `WHY no existing test caught it and suggest ONE specific test case (input values and ` +
+    `expected assertion) that would kill it. Be concise – one short paragraph per mutant.\n\n` +
+    mutantDescriptions;
+
+  const requestBody = JSON.stringify({
+    model,
+    messages: [{ role: "user", content: prompt }],
+    max_tokens: 1500,
+    temperature: 0.3,
+  });
+
+  return new Promise((resolve) => {
+    const options = {
+      hostname: "api.openai.com",
+      path: "/v1/chat/completions",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Length": Buffer.byteLength(requestBody),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.error) {
+            console.warn(`[openai] API error: ${parsed.error.message}`);
+            resolve(null);
+            return;
+          }
+          resolve(parsed.choices?.[0]?.message?.content ?? null);
+        } catch {
+          console.warn("[openai] Failed to parse API response");
+          resolve(null);
+        }
+      });
+    });
+
+    req.on("error", (err) => {
+      console.warn(`[openai] Request failed: ${err.message}`);
+      resolve(null);
+    });
+
+    req.setTimeout(30000, () => {
+      console.warn("[openai] Request timed out");
+      req.destroy();
+      resolve(null);
+    });
+
+    req.write(requestBody);
+    req.end();
+  });
+}
+
+// ─── Report formatting ───────────────────────────────────────────────────────
+
+function formatMutationSection(mutationData, aiDiagnostics, mutationThreshold) {
+  const threshold = mutationThreshold ?? DEFAULTS.mutationThreshold;
+  const lines = [];
+
+  lines.push("## 2. Mutation Testing Results");
+  lines.push("");
+
+  if (!mutationData) {
+    lines.push("No mutation report found. Run Stryker first or provide `--mutation=<path>`.");
+    lines.push("");
+    return lines.join("\n");
+  }
+
+  const pass = mutationData.score >= threshold;
+  const statusBadge = pass ? "✅ PASS" : "❌ FAIL";
+
+  lines.push(`**Status: ${statusBadge}**`);
+  lines.push("");
+  lines.push(`| Metric | Value |`);
+  lines.push(`|--------|-------|`);
+  lines.push(`| Mutation Score | **${mutationData.score.toFixed(2)}%** (threshold: ${threshold}%) |`);
+  lines.push(`| Total Mutants | ${mutationData.total} |`);
+  lines.push(`| Killed / Timeout | ${mutationData.killed} |`);
+  lines.push(`| Survived | ${mutationData.survived} |`);
+  lines.push(`| No Coverage | ${mutationData.noCoverage} |`);
+  lines.push(`| Ignored / Compile Error | ${mutationData.ignored} |`);
+  lines.push("");
+
+  if (!pass) {
+    lines.push("### ⚠️ Threshold Not Met");
+    lines.push("");
+    lines.push(
+      `The mutation score of **${mutationData.score.toFixed(2)}%** is below the required **${threshold}%** threshold. ` +
+      `${mutationData.survived} mutant(s) survived and ${mutationData.noCoverage} had no test coverage.`
+    );
+    lines.push("");
+  }
+
+  if (mutationData.survivedMutants.length > 0) {
+    lines.push("### Survived Mutants");
+    lines.push("");
+    lines.push("These mutations were **not caught** by any test:");
+    lines.push("");
+
+    for (const [file, mutants] of Object.entries(mutationData.survivedByFile)) {
+      lines.push(`#### ${file}`);
+      lines.push("");
+      for (const m of mutants) {
+        const line = m.location?.start?.line ?? "?";
+        const col = m.location?.start?.column ?? "?";
+        lines.push(`- **[${m.mutatorName}]** line ${line}:${col}`);
+        if (m.original !== undefined && m.original !== null) {
+          lines.push(`  - Original : \`${String(m.original).trim()}\``);
+        }
+        if (m.replacement !== undefined && m.replacement !== null) {
+          lines.push(`  - Mutant   : \`${String(m.replacement).trim()}\``);
+        }
+      }
+      lines.push("");
+    }
+  }
+
+  if (mutationData.noCoverageMutants.length > 0) {
+    lines.push("### No-Coverage Mutants (lines never executed by any test)");
+    lines.push("");
+    const byFile = {};
+    for (const m of mutationData.noCoverageMutants) {
+      if (!byFile[m.file]) byFile[m.file] = [];
+      byFile[m.file].push(m);
+    }
+    for (const [file, mutants] of Object.entries(byFile)) {
+      lines.push(`- **${file}**: ${mutants.length} mutant(s) at lines ` +
+        mutants.map((m) => m.location?.start?.line ?? "?").join(", "));
+    }
+    lines.push("");
+  }
+
+  if (aiDiagnostics) {
+    lines.push("### 🤖 AI-Generated Diagnostics (OpenAI)");
+    lines.push("");
+    lines.push("> *The following analysis was generated by the OpenAI API, which was called because*");
+    lines.push("> *survived mutants encode fine-grained semantic information about testing gaps that*");
+    lines.push("> *cannot be effectively translated into actionable suggestions by static rules alone.*");
+    lines.push("");
+    lines.push(aiDiagnostics);
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+function formatMarkdownReport({ config, jestData, coverageData, mutationData, aiDiagnostics }) {
   const now = new Date().toISOString();
 
   const recommendations = guessRecommendations({
     failingTests: jestData.failingTests,
     lowCoverageFiles: coverageData.lowCoverageFiles,
+    mutationData,
+    mutationThreshold: config.mutationThreshold,
   });
 
   const lines = [];
@@ -303,6 +626,7 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
   lines.push(`Generated at: ${now}`);
   lines.push("");
 
+  // ── 1. Summary ──
   lines.push("## 1. Summary");
   lines.push("");
   lines.push(`- Failed test suites: ${jestData.suitesFailed}`);
@@ -312,6 +636,15 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
     lines.push(
       `- Total coverage: lines ${coverageData.total.linesPct}%, statements ${coverageData.total.statementsPct}%, functions ${coverageData.total.functionsPct}%, branches ${coverageData.total.branchesPct}%`
     );
+  }
+  if (mutationData) {
+    const status = mutationData.score >= config.mutationThreshold ? "✅ PASS" : "❌ FAIL";
+    lines.push(
+      `- Mutation score: ${mutationData.score.toFixed(2)}% ${status} ` +
+      `(killed: ${mutationData.killed}, survived: ${mutationData.survived}, no coverage: ${mutationData.noCoverage})`
+    );
+  } else {
+    lines.push("- Mutation score: not available");
   }
   lines.push("");
 
@@ -324,7 +657,11 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
     lines.push("");
   }
 
-  lines.push("## 2. Failing Tests");
+  // ── 2. Mutation Testing ──
+  lines.push(formatMutationSection(mutationData, aiDiagnostics, config.mutationThreshold));
+
+  // ── 3. Failing Tests ──
+  lines.push("## 3. Failing Tests");
   lines.push("");
 
   if (jestData.failingTests.length === 0) {
@@ -360,7 +697,8 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
     });
   }
 
-  lines.push("## 3. Low Coverage Files");
+  // ── 4. Low Coverage Files ──
+  lines.push("## 4. Low Coverage Files");
   lines.push("");
 
   if (coverageData.lowCoverageFiles.length === 0) {
@@ -379,7 +717,8 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
     });
   }
 
-  lines.push("## 4. Recommended Next Actions");
+  // ── 5. Recommended Next Actions ──
+  lines.push("## 5. Recommended Next Actions");
   lines.push("");
   if (recommendations.length === 0) {
     lines.push("- No recommendations generated.");
@@ -388,7 +727,8 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
   }
   lines.push("");
 
-  lines.push("## 5. Suggested Follow-Up Test Targets");
+  // ── 6. Suggested Follow-Up Test Targets ──
+  lines.push("## 6. Suggested Follow-Up Test Targets");
   lines.push("");
   if (coverageData.lowCoverageFiles.length === 0) {
     lines.push("- No obvious follow-up targets from coverage artifacts.");
@@ -404,7 +744,8 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
     });
   }
 
-  lines.push("## 6. Configuration");
+  // ── 7. Configuration ──
+  lines.push("## 7. Configuration");
   lines.push("");
   lines.push("```json");
   lines.push(
@@ -412,11 +753,16 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
       {
         jest: config.jest,
         coverage: config.coverage,
+        mutation: config.mutation,
         out: config.out,
+        mutationThreshold: config.mutationThreshold,
         branchThreshold: config.branchThreshold,
         lineThreshold: config.lineThreshold,
         functionThreshold: config.functionThreshold,
         statementThreshold: config.statementThreshold,
+        skipMutationRun: config.skipMutationRun,
+        openaiModel: config.openaiModel,
+        openaiEnabled: !!process.env.OPENAI_API_KEY,
       },
       null,
       2
@@ -428,9 +774,59 @@ function formatMarkdownReport({ config, jestData, coverageData }) {
   return lines.join("\n");
 }
 
-function main() {
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+async function main() {
   const config = parseArgs(process.argv);
 
+  // ── Step 1: Run Stryker (unless skipped) ──
+  if (!config.skipMutationRun) {
+    runStryker();
+  } else {
+    console.log("[mutation] Skipping Stryker run (--skipMutationRun). Reading existing report.");
+  }
+
+  // ── Step 2: Parse mutation report ──
+  const mutationData = parseMutationReport(config.mutation);
+  if (!mutationData) {
+    console.warn(`[mutation] Warning: mutation report not found at ${config.mutation}`);
+  } else {
+    const pass = mutationData.score >= config.mutationThreshold;
+    const badge = pass ? "PASS" : "FAIL";
+    console.log(
+      `[mutation] Score: ${mutationData.score.toFixed(2)}% | Threshold: ${config.mutationThreshold}% | ` +
+      `Killed: ${mutationData.killed} | Survived: ${mutationData.survived} | ` +
+      `No Coverage: ${mutationData.noCoverage} | Status: ${badge}`
+    );
+    if (!pass) {
+      console.log(
+        `[mutation] ❌ FAIL — mutation score ${mutationData.score.toFixed(2)}% is below ` +
+        `the required ${config.mutationThreshold}%.`
+      );
+      if (mutationData.survived > 0) {
+        console.log(`[mutation] Survived mutants by file:`);
+        for (const [file, mutants] of Object.entries(mutationData.survivedByFile)) {
+          console.log(`  ${file}: ${mutants.length} survived`);
+          for (const m of mutants) {
+            const line = m.location?.start?.line ?? "?";
+            console.log(`    - [${m.mutatorName}] line ${line}: ${String(m.replacement ?? "").trim()}`);
+          }
+        }
+      }
+    }
+  }
+
+  // ── Step 3: Call OpenAI for AI diagnostics on survived mutants ──
+  let aiDiagnostics = null;
+  if (mutationData && mutationData.survivedMutants.length > 0 && process.env.OPENAI_API_KEY) {
+    console.log("[openai] Calling OpenAI API to generate diagnostics for survived mutants…");
+    aiDiagnostics = await callOpenAI(mutationData.survivedMutants, config.openaiModel);
+    if (aiDiagnostics) {
+      console.log("[openai] Diagnostics received.");
+    }
+  }
+
+  // ── Step 4: Parse Jest output and coverage ──
   const jestText = safeRead(config.jest);
   const coverageJson = safeReadJson(config.coverage);
 
@@ -442,17 +838,32 @@ function main() {
     statementThreshold: config.statementThreshold,
   });
 
+  // ── Step 5: Generate report ──
   const report = formatMarkdownReport({
     config,
     jestData,
     coverageData,
+    mutationData,
+    aiDiagnostics,
   });
 
   fs.writeFileSync(config.out, report, "utf8");
 
-  console.log(`AI testing report written to ${config.out}`);
-  if (!jestText) console.log(`Warning: Jest output file not found at ${config.jest}`);
-  if (!coverageJson) console.log(`Warning: Coverage summary not found at ${config.coverage}`);
+  console.log(`[report] AI testing report written to ${config.out}`);
+  if (!jestText) console.log(`[report] Warning: Jest output file not found at ${config.jest}`);
+  if (!coverageJson) console.log(`[report] Warning: Coverage summary not found at ${config.coverage}`);
+
+  // ── Step 6: Exit non-zero if mutation threshold not met ──
+  if (mutationData && mutationData.score < config.mutationThreshold) {
+    console.error(
+      `\n❌ Mutation testing FAILED: score ${mutationData.score.toFixed(2)}% < threshold ${config.mutationThreshold}%.\n` +
+      `   See ${config.out} for full diagnostics.`
+    );
+    process.exit(1);
+  }
 }
 
-main();
+main().catch((err) => {
+  console.error("[fatal]", err);
+  process.exit(1);
+});

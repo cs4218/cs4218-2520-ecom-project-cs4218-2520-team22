@@ -52,7 +52,7 @@ const Login = () => {
     <Layout title="Login - Ecommerce App">
       <div className="form-container " style={{ minHeight: "90vh" }}>
         <form onSubmit={handleSubmit}>
-          <h4 className="title">LOGIN FORM</h4>
+          <h1 className="title">LOGIN FORM</h1>
 
           <div className="mb-3">
             <input
