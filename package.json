@@ -20,14 +20,10 @@
     "test:a11y": "npx playwright test tests/a11y",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js --runInBand",
     "test:e2e": "npx playwright test e2e",
-<<<<<<< HEAD
     "test:ai": "npm test -- --coverage > jest-output.txt 2>&1 && node scripts/aiTestAgent.js"
-      },
+  },
   "mongodbMemoryServer": {
     "downloadDir": ".cache/mongodb-binaries"
-=======
-    "test:ai": "npm test -- --coverage > jest-output.txt 2>&1 ; node scripts/aiTestAgent.js"
->>>>>>> copilot/update-skeleton-for-mutation-testing
   },
   "keywords": [],
   "author": "RP",
@@ -56,8 +52,6 @@
     "@babel/preset-env": "^7.24.5",
     "@babel/preset-react": "^7.24.1",
     "@playwright/test": "^1.44.0",
-    "@stryker-mutator/core": "^8.7.1",
-    "@stryker-mutator/jest-runner": "^8.7.1",
     "@types/node": "^20.12.12",
     "babel-jest": "^29.7.0",
     "cross-env": "^10.1.0",
