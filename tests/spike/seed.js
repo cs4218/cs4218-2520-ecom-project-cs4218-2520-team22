@@ -9,8 +9,14 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import slugify from "slugify";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CSV_FILE = path.join(__dirname, "product-photos.csv");
 
 const MONGO_URL = process.env.MONGO_URL;
 const SPIKE_PREFIX = "SPIKE_";
@@ -99,11 +105,22 @@ const seed = async () => {
     }
     console.log(`   ✅ Created ${categories.length} test categories`);
 
+    // Create a simple 1x1 pixel PNG placeholder for photos (1027 bytes)
+    // This is a minimal valid PNG file that can be used for testing
+    const placeholderPhoto = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+      0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, 0x08, 0x99, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+      0x00, 0x03, 0x01, 0x01, 0x00, 0x18, 0xdd, 0x8d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+      0x44, 0xae, 0x42, 0x60, 0x82,
+    ]);
+
     // Create 20 products spread across categories
     let productCount = 0;
+    const productIds = [];
     for (let i = 1; i <= 20; i++) {
       const catIdx = (i - 1) % categories.length;
-      await Product.create({
+      const product = await Product.create({
         name: `${SPIKE_PREFIX}Product${i}`,
         slug: slugify(`${SPIKE_PREFIX}Product${i}`, { lower: true }),
         description: `Performance test product for spike testing - ${i}`,
@@ -111,13 +128,34 @@ const seed = async () => {
         category: categories[catIdx]._id,
         quantity: 1000,
         shipping: true,
+        photo: {
+          data: placeholderPhoto,
+          contentType: "image/png",
+        },
       });
+      productIds.push(product);
       productCount++;
     }
-    console.log(`   ✅ Created ${productCount} test products`);
+    console.log(`   ✅ Created ${productCount} test products (with placeholder photos)`);
+
+    // Generate CSV with product IDs and backend photo URLs
+    const BACKEND_HOST = process.env.PORT || 3000;
+    const BACKEND_URL_BASE = `http://localhost:${BACKEND_HOST}/api/v1/product/product-photo`;
+    
+    const csvRows = ["productSlug,productName,productId,photoBackendUrl"];
+    productIds.forEach((product) => {
+      const photoUrl = `${BACKEND_URL_BASE}/${product._id}`;
+      csvRows.push(
+        `${product.slug},${product.name},${product._id},"${photoUrl}"`
+      );
+    });
+
+    fs.writeFileSync(CSV_FILE, csvRows.join("\n"), "utf-8");
+    console.log(`   ✅ Generated ${CSV_FILE}`);
 
     console.log("\n✨ Spike test data seeded successfully!");
-    console.log(`📊 Total: ${users.length} users, ${categories.length} categories, ${productCount} products\n`);
+    console.log(`📊 Total: ${users.length} users, ${categories.length} categories, ${productCount} products`);
+    console.log(`📄 CSV: ${CSV_FILE}\n`);
 
     await mongoose.disconnect();
     process.exit(0);
