@@ -22,7 +22,9 @@ const CartPage = () => {
     try {
       let total = 0;
       cart?.map((item) => {
-        total = total + item.price;
+        // Safely handle price - convert to number and handle NaN
+        const price = parseFloat(item.price) || 0;
+        total = total + price;
       });
       return total.toLocaleString("en-US", {
         style: "currency",
@@ -30,6 +32,7 @@ const CartPage = () => {
       });
     } catch (error) {
       console.log(error);
+      return "$0.00";
     }
   };
   //delete item

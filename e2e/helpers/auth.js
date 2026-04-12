@@ -36,9 +36,13 @@ export const loginAs = async (page, email, password) => {
  */
 export const loginAsUser = async (page) => {
   await loginAs(page, E2E_USER_EMAIL, E2E_USER_PASSWORD);
+  // Wait for navigation away from login page
   await page.waitForURL((url) => !url.toString().includes("/login"), {
     timeout: 10000,
   });
+  // Give extra time for react context to update and header to render
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(1000);
 };
 
 /**
@@ -47,9 +51,13 @@ export const loginAsUser = async (page) => {
  */
 export const loginAsAdmin = async (page) => {
   await loginAs(page, E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD);
+  // Wait for navigation away from login page
   await page.waitForURL((url) => !url.toString().includes("/login"), {
     timeout: 10000,
   });
+  // Give extra time for react context to update and header to render
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(1000);
 };
 
 export const registerAs = async (page, {
