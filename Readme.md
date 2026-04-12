@@ -184,6 +184,16 @@ Run these commands from the project root:
   npm run test:ai
   ```
 
+- **Soak tests (k6)**
+  - for a quick 1-minute sanity test with ramp-up and ramp-down
+  ```bash
+  npm run nft:soak:quick
+  ```
+   - for a full 2hr soak test with 50 virtual users
+  ```
+  npm run nft:soak
+  ```
+
 - **All tests**
 
    ```bash
