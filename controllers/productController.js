@@ -115,6 +115,11 @@ export const productPhotoController = async (req, res) => {
     if (product.photo.data) {
       res.set("Content-type", product.photo.contentType);
       return res.status(200).send(product.photo.data);
+    } else {
+      return res.status(404).send({
+        success: false,
+        message: "Photo not found",
+      });
     }
   } catch (error) {
     console.log(error);
@@ -178,7 +183,7 @@ export const updateProductController = async (req, res) => {
       products.photo.contentType = photo.type;
     }
     await products.save();
-    res.status(201).send({
+    res.status(200).send({
       success: true,
       message: "Product Updated Successfully",
       products,
@@ -243,7 +248,7 @@ export const productListController = async (req, res) => {
       .select("-photo")
       .skip((page - 1) * perPage)
       .limit(perPage)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1, _id: -1 });
     res.status(200).send({
       success: true,
       products,

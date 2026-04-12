@@ -50,7 +50,14 @@ export const registerController = async (req, res) => {
     res.status(201).send({
       success: true,
       message: "User registered successfully",
-      user,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.log(error);
@@ -73,19 +80,28 @@ export const loginController = async (req, res) => {
         message: "Invalid email or password",
       });
     }
+    // Guard against NoSQL injection — email and password must be plain strings
+    if (typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
     //check user
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(404).send({
+      // Use a generic message to prevent user enumeration (OWASP A07)
+      return res.status(401).send({
         success: false,
-        message: "Email is not registered",
+        message: "Invalid email or password",
       });
     }
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(200).send({
+      // Same generic message and status code to prevent user enumeration
+      return res.status(401).send({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid email or password",
       });
     }
     //token
@@ -127,6 +143,13 @@ export const forgotPasswordController = async (req, res) => {
     }
     if (!newPassword) {
       return res.status(400).send({ message: "New Password is required" });
+    }
+    // Guard against NoSQL injection — fields must be plain strings
+    if (typeof email !== "string" || typeof answer !== "string") {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid input",
+      });
     }
     //check
     const user = await userModel.findOne({ email, answer });
@@ -241,7 +264,7 @@ export const orderStatusController = async (req, res) => {
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
-      { new: true }
+      { new: true, runValidators: true }
     );
     res.json(orders);
   } catch (error) {

@@ -533,14 +533,17 @@ describe("productListController", () => {
     expect(selectMock).toHaveBeenCalledWith("-photo");
     expect(skipMock).toHaveBeenCalledWith(6); // (page-1)*perPage = (2-1)*6 = 6
     expect(limitMock).toHaveBeenCalledWith(6);
-    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+    expect(sortMock).toHaveBeenCalledWith({
+      _id: -1,
+      createdAt: -1
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
       products: mockProducts,
     });
   });
-
+  // modified by Qinzhe Wang, A0337880U
   it("should handle errors and send a failure response", async () => {
     const errorMessage = "Database error";
 
@@ -573,7 +576,7 @@ describe("productListController", () => {
     expect(selectMock).toHaveBeenCalledWith("-photo");
     expect(skipMock).toHaveBeenCalledWith(6);
     expect(limitMock).toHaveBeenCalledWith(6);
-    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1, _id: -1 });
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -1395,7 +1398,7 @@ describe("updateProductController", () => {
 
     expect(saveMock).toHaveBeenCalledTimes(1);
 
-    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
@@ -1433,7 +1436,7 @@ describe("updateProductController", () => {
     expect(productDoc.photo.contentType).toBe("image/png");
 
     expect(saveMock).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 
   test("returns 500 when database throws", async () => {
