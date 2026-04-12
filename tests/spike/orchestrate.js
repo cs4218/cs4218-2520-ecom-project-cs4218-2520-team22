@@ -18,8 +18,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SPIKE_DIR = __dirname;
 const RESULTS_DIR = path.join(SPIKE_DIR, "results");
 const TEST_FILES = [
-  // spike-recorder.jmx is a utility file, do not test that
-  // "spike-login.jmx",
+  // spike-recorder.jmx is a utility file, do not test that!
+  "spike-login.jmx",
   "spike-products.jmx",
   "spike-payment.jmx",
 ];
