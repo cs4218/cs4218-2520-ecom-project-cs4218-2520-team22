@@ -1,6 +1,8 @@
 name: Run Tests
 
 on:
+  schedule:
+    - cron: "0 * * * *"
   pull_request:
     branches: 
       - main
@@ -30,7 +32,7 @@ jobs:
         run: |
           cd client
           npm install
-      
+
       - name: Run backend tests
         run: npm run test:backend
 

@@ -11,7 +11,7 @@ const app = express();
 // middlewares
 app.use(cors());
 app.use(express.json());
-app.use(morgan("dev"));
+// app.use(morgan("dev")); // Disabled to reduce console noise during spike testing
 
 // routes
 app.use("/api/v1/auth", authRoutes);
@@ -19,7 +19,7 @@ app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);
 
 app.get("/", (req, res) => {
-  res.send("<h1>Welcome to ecommerce app</h1>");
+  res.send("<h1>Welcome to Virtual Vault</h1>");
 });
 
 export default app;

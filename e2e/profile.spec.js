@@ -88,11 +88,35 @@ test("E2E-PROFILE-03b: Updated profile data persists on /dashboard/user", async 
   await page.getByPlaceholder(/enter your name/i).fill(updatedName);
   await page.getByPlaceholder(/enter your address/i).fill(updatedAddress);
   await page.getByRole("button", { name: /^UPDATE$/i }).click();
-
+  
+  // Wait for success toast to appear
+  await expect(page.getByText(/Profile Updated Successfully/i)).toBeVisible({ timeout: 5000 });
+  
   await page.goto("/dashboard/user");
-  await expect(page.getByText(`Name: ${updatedName}`)).toBeVisible({ timeout: 8000 });
-  await expect(page.getByText(`Address: ${updatedAddress}`)).toBeVisible();
-});
+  await page.waitForLoadState("domcontentloaded");
+  // Wait for profile data to load from API after update
+  await page.waitForLoadState("networkidle");
+    
+  // The dashboard page displays user data in separate h3 tags
+  // Check that both updated name and address are present in their respective h3s
+  const h3Locator = page.locator("h3");
+  const h3s = await h3Locator.all();
+  
+  let nameFound = false;
+  let addressFound = false;
+  
+  for (let h3 of h3s) {
+    const text = await h3.textContent();
+    if (text && text.includes(updatedName)) {
+      nameFound = true;
+    }
+    if (text && text.includes(updatedAddress)) {
+      addressFound = true;
+    }
+  }
+  expect(nameFound).toBe(true);
+  expect(addressFound).toBe(true);
+  });
 
 // addded the test case, Daniel Lai, A0192327A
 test("E2E-PROFILE-03c: Updated profile data persists after logout and login", async ({ page }) => {

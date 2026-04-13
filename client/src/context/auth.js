@@ -12,6 +12,7 @@ const AuthProvider = ({ children }) => {
     //default axios
     axios.defaults.headers.common["Authorization"] = auth?.token;
 
+    // Load auth from localStorage on mount
     useEffect(() => {
         const data = localStorage.getItem("auth");
         try {
@@ -26,7 +27,13 @@ const AuthProvider = ({ children }) => {
         } catch (error) {
             console.log("Something went wrong with localStorage", error);
         }
-    }, []);
+    }, []); // Only run on mount
+
+    // Update axios headers whenever auth changes
+    useEffect(() => {
+        axios.defaults.headers.common["Authorization"] = auth?.token;
+    }, [auth?.token]);
+
     return (
         <AuthContext.Provider value={[auth, setAuth]}>
             {children}

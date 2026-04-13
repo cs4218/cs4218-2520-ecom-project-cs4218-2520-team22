@@ -318,6 +318,7 @@ describe("authController unit tests", () => {
 
     describe("orderStatusController", () => {
       // add test case, Song Yichao, A0255686M
+      // modified by Qinzhe Wang, A0337880U
       it("should update order status and return updated order", async () => {
         const req = { params: { orderId: ORDER_ID }, body: { status: "Shipped" } };
         const res = makeRes();
@@ -330,7 +331,8 @@ describe("authController unit tests", () => {
         expect(mockOrderModel.findByIdAndUpdate).toHaveBeenCalledWith(
           ORDER_ID,
           { status: "Shipped" },
-          { new: true, runValidators: true }
+          { new: true ,
+            runValidators: true}
         );
         expect(res.json).toHaveBeenCalledWith(updated);
       });
@@ -852,6 +854,7 @@ describe("authController unit tests", () => {
       });
 
       // added the test case, Daniel Lai, A0192327A
+      // modified by Qinzhe Wang, A0337880U
       it("should return error when user does not exist", async () => {
         const testReq = {
           body: {
@@ -868,15 +871,16 @@ describe("authController unit tests", () => {
         await loginController(testReq, testRes); // Act
 
         expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "nonexistent@example.com" });
-        expect(testRes.status).toHaveBeenCalledWith(404);
+        expect(testRes.status).toHaveBeenCalledWith(401);
         expect(testRes.send).toHaveBeenCalledWith({
           success: false,
-          message: "Email is not registered",
+          message: "Invalid email or password",
         });
         expect(mockAuthHelper.comparePassword).not.toHaveBeenCalled();
       });
 
       // added the test case, Daniel Lai, A0192327A
+      // modified by Qinzhe Wang, A0337880U
       it("should return error when password is incorrect", async () => {
         const testReq = {
           body: {
@@ -900,10 +904,10 @@ describe("authController unit tests", () => {
 
         expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
         expect(mockAuthHelper.comparePassword).toHaveBeenCalledWith("wrongpassword", "hashedPassword123");
-        expect(testRes.status).toHaveBeenCalledWith(200);
+        expect(testRes.status).toHaveBeenCalledWith(401);
         expect(testRes.send).toHaveBeenCalledWith({
           success: false,
-          message: "Invalid Password",
+          message: "Invalid email or password",
         });
         expect(mockJWT.sign).not.toHaveBeenCalled();
       });
@@ -1053,7 +1057,8 @@ describe("authController unit tests", () => {
       });
 
       // add test case, Song Yichao, A0255686M
-      it("should return 404 if user is not found", async () => {
+      // modified by Qinzhe Wang, A0337880U
+      it("should return 401 if user is not found", async () => {
         const req = { body: { email: "a@b.com", password: "123456" } };
         const res = makeRes();
 
@@ -1062,17 +1067,18 @@ describe("authController unit tests", () => {
         await loginController(req, res);
 
         expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: "a@b.com" });
-        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send).toHaveBeenCalledWith(
           expect.objectContaining({
             success: false,
-            message: "Email is not registered",
+            message: "Invalid email or password",
           })
         );
       });
 
       // add test case, Song Yichao, A0255686M
-      it("should return 200 if password does not match", async () => {
+      // modified test, Qinzhe Wang, A0337880U
+      it("should return 401 if password does not match", async () => {
         const req = { body: { email: "a@b.com", password: "wrongpw" } };
         const res = makeRes();
 
@@ -1090,11 +1096,11 @@ describe("authController unit tests", () => {
         await loginController(req, res);
 
         expect(mockAuthHelper.comparePassword).toHaveBeenCalledWith("wrongpw", "hash");
-        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send).toHaveBeenCalledWith(
           expect.objectContaining({
             success: false,
-            message: "Invalid Password",
+            message: "Invalid email or password",
           })
         );
       });
@@ -1435,7 +1441,7 @@ describe("authController unit tests", () => {
       // Assuming that testController / testRoute is a test endpoint that may be used by others for now
       // Avoiding infinite loops of errors?
 
-      // added the test case, Daniel Lai, A0192327A 
+      // added the test case, Daniel Lai, A0192327A
       it("should not send more messages after throwing an error", async () => {
         const mockReq = jest.fn();
         const testRes = {

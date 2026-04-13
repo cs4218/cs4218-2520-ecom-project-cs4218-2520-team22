@@ -54,10 +54,12 @@
   }
   
   .forgot-btn {
-    background-color: #434343a4 !important;
-    border: 0 !important;
+    background-color: #555 !important;
+    border: 1px solid #000 !important;
+    color: white !important;
   }
   
   .forgot-btn:hover {
     color: white !important;
+    background-color: #333 !important;
   }

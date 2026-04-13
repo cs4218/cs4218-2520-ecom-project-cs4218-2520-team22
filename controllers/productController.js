@@ -109,6 +109,7 @@ export const getSingleProductController = async (req, res) => {
 };
 
 // get photo
+// modified by Qinzhe Wang A0337880U
 export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
@@ -116,7 +117,10 @@ export const productPhotoController = async (req, res) => {
       res.set("Content-type", product.photo.contentType);
       return res.status(200).send(product.photo.data);
     } else {
-      return res.status(404).send({ success: false, message: "No photo found" });
+      return res.status(404).send({
+        success: false,
+        message: "Photo not found",
+      });
     }
   } catch (error) {
     console.log(error);
@@ -226,7 +230,6 @@ export const productCountController = async (req, res) => {
       total,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).send({
       message: "Error in product count",
       error,
@@ -245,13 +248,12 @@ export const productListController = async (req, res) => {
       .select("-photo")
       .skip((page - 1) * perPage)
       .limit(perPage)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1, _id: -1 });
     res.status(200).send({
       success: true,
       products,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).send({
       success: false,
       message: "error in per page ctrl",
