@@ -41,3 +41,4 @@ Thumbs.db
 # Temporary AI-driven testing files
 ai-testing-report.md
 jest-output.txt
+jest-backend-output.txt
